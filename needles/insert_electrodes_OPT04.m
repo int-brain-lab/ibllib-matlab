@@ -48,7 +48,7 @@ E.theta(ne+1:end) = 20/180*pi;
 % duplicate all program and revert theta angle
 e = E;
 e.theta = e.theta .* -1; e.xyz_entry = e.xyz_entry + [delec/2 delec/2 0];
-E = ConcatenateStruct(E, e);
+E = cat_struct(E, e);
 ne = size(E.xyz_entry,1);
 
 % Find the electrodes path using polar coordinates
@@ -95,7 +95,7 @@ esel = esel & between(E.xyz_entry(:,1), lims.ml_lims); % REmove lateral electrod
 % remove insertions too close to the midline vascular system
 esel = esel & ~between(E.xyz_entry(:,1), cs.i2x(cs.nx/2)+[-1 1].*mid_line_exclusion_mm/1000);
 % save the selections in the structure
-E = StructSelect(E, esel);
+E = structfun(@(x) x(esel,:), E, 'UniformOutput', false);
 E.esel = logical(E.rec_length * 0 +1);
 
 if csv

@@ -48,11 +48,11 @@ E = structfun(@(x) repmat(x,2,1), E, 'UniformOutput', false);
 E.theta(1:ne) = 10/180*pi; % shallow electrodes 10 degrees
 E.theta(ne+1:end) = 20/180*pi;
 % split electrode angle at point 2192, remove this and double implantations to the 2 neighboring points
-E = StructSelect(E, ~(E.Point == 2192));
+E = structfun(@(x) x(~(E.Point == 2192),:), E, 'UniformOutput', false);
 E.theta = E.theta .* sign(E.Point - 2190);
-ee = StructSelect(E, abs(E.Point - 2192) == 24);
+ee = structfun(@(x) x(abs(E.Point - 2192) == 24,:), E, 'UniformOutput', false);
 ee.theta = -ee.theta;
-E = ConcatenateStruct(E, ee);
+E = cat_struct(E, ee);
 
 
 ne = size(E.xyz_entry,1);
@@ -101,7 +101,7 @@ esel = esel & between(E.xyz_entry(:,1), lims.ml_lims); % REmove lateral electrod
 % remove insertions too close to the midline vascular system
 esel = esel & ~between(E.xyz_entry(:,1), cs.i2x(cs.nx/2)+[-1 1].*mid_line_exclusion_mm/1000);
 % save the selections in the structure
-E = StructSelect(E, esel);
+E = structfun(@(x) x(esel,:), E, 'UniformOutput', false);
 E.esel = logical(E.rec_length * 0 +1);
 
 if csv

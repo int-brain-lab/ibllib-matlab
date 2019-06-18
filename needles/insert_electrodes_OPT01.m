@@ -94,7 +94,7 @@ esel = esel & between(E.xyz_entry(:,1), lims.ml_lims); % REmove lateral electrod
 % remove insertions too close to the midline vascular system
 esel = esel & ~between(E.xyz_entry(:,1), cs.i2x(cs.nx/2)+[-1 1].*mid_line_exclusion_mm/1000);
 % save the selections in the structure
-E = StructSelect(E, esel);
+E = structfun(@(x) x(esel,:), E, 'UniformOutput', false);
 E.esel = logical(E.rec_length * 0 +1);
 
 if csv
