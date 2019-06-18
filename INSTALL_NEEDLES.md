@@ -17,7 +17,7 @@ Needles uses the DSURQE Atlas. For more information, http://www.mouseimaging.ca/
 -	Within the WGs/Physiology repository, edit the `./ibllib-matlab-master/needles/needles_param.json` file.  
 -	Set the path_atlas to the folder in which you did download the 3 files mentionned above.  
 For example: 
-	` "path_atlas": "/datadisk/BrainAtlas/ATLASES/DSURQE_40micron",`  
+	` "path_atlas": "/datadisk/BrainAtlas/ATLASES/",`  
 **Windows users need to "escape" backslashes this way**:  
 	` "path_atlas": "C:\\path\\to\\my\\folder",`  
 
