@@ -26,7 +26,7 @@ For example:
 For general use without worrying about the path, run `Run_Needles.m`  file in Matlab
 
 For advanced use with a non-frozen ibllib library, set your paths to:
--	`./WGs/Physiology/`
+-	`./ibllib-matlab-master/needles/`
 -	the ibllib Matlab library
 
 ## Usage
