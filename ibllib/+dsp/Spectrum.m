@@ -26,7 +26,7 @@ for ff=fields(p.Results)', eval([ff{1} '=p.Results.' ff{1} ';' ]); end
 
 % Calcul du spectre
 Freq=dsp.fscale(size(W,1),Si,'real');
-Amp=20*log10(abs(dsp.freduce(fft(W))).*sqrt(2*Si/size(W,1)));
+Amp=20*log10(abs(dsp.freduce(fft(W))).*sqrt(2*Si/size(W,1)) + eps);
 Phi=angle(dsp.freduce(fft(W)));
 
 % Unwrap or not
