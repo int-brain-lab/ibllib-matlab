@@ -14,7 +14,7 @@ Needles uses the DSURQE Atlas. For more information, http://www.mouseimaging.ca/
 
 ## Clone or download the WGs repository
 -	Clone or download the WGs repository (https://github.com/int-brain-lab/needles)
--	Within the WGs/Physiology repository, edit the `./WGs/Physiology/needles_param.json` file.  
+-	Within the WGs/Physiology repository, edit the `./ibllib-matlab-master/needles/needles_param.json` file.  
 -	Set the path_atlas to the folder in which you did download the 3 files mentionned above.  
 For example: 
 	` "path_atlas": "/datadisk/BrainAtlas/ATLASES/DSURQE_40micron",`  
