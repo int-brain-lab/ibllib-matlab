@@ -29,9 +29,9 @@ classdef test_AlyxClient < matlab.unittest.TestCase
         
         function test_get_sessions(testCase)
             % tests automatic replacement of base_url or not
-            r1 = testCase.ac.get_session('86e27228-8708-48d8-96ed-9aa61ab951db');
+            r1 = testCase.ac.get_session('cf264653-2deb-44cb-aa84-89b82507028a');
             r2 = testCase.ac.get_session(...
-                'https://test.alyx.internationalbrainlab.org/sessions/86e27228-8708-48d8-96ed-9aa61ab951db');
+                'https://test.alyx.internationalbrainlab.org/sessions/cf264653-2deb-44cb-aa84-89b82507028a');
             testCase.verifyEqual(r1,r2);
         end
         
