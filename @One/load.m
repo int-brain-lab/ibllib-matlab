@@ -30,6 +30,7 @@ addOptional(p,'force_replace',false);
 addOptional(p, 'dclass_output', false);
 addOptional(p, 'cache_dir', self.par.CACHE_DIR);
 addOptional(p, 'download_only', false)
+addOptional(p, 'einfo', [])
 parse(p,varargin{:});
 for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
 if ischar(dataset_types), dataset_types = {dataset_types}; end
@@ -37,7 +38,11 @@ if ischar(dataset_types), dataset_types = {dataset_types}; end
 %% real stuff
 % eid could be a full URL or just an UUID, reformat as only UUID string
 eid = strsplit(eid, '/'); eid = eid{end};
-ses = self.alyx_client.get_session(eid);
+if ~isempty(einfo)
+    ses = einfo;
+else
+    ses = self.alyx_client.get_session(eid);
+end
 % if the dtypes are empty, request full download and output a dclass
 if isempty(dataset_types)
     dataset_types = ses.data_dataset_session_related.dataset_type;
