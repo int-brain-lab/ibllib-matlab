@@ -17,6 +17,7 @@ classdef CartesianVolume
     methods
         % Constructor
         function self = CartesianVolume(V, dxyz, xyz0)
+            % V has dimensions [Nz, Nx, Ny]
             [self.nz, self.nx, self.ny] = size(V);
             if nargin >=3
                 if length(xyz0)==1, xyz0 = xyz0.*[1 1 1]; end

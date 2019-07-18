@@ -20,7 +20,7 @@ end
 
 function Needles_OpeningFcn(hobj, evt, h, varargin)
 h.output = hobj;
-h.ver = '0.1.0';
+h.ver = '1.0.0';
 guidata(hobj, h);
 
 

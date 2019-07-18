@@ -97,7 +97,7 @@ classdef test_one < matlab.unittest.TestCase
             testCase.assertEqual(testCase.eid2, a)
         end
         
-        function test_load(testCase)
+        function test_load_single_session(testCase)
             % Test with 3 actual datasets predefined
             dataset_types = {'clusters.peakChannel', 'clusters._phy_annotation', 'clusters.probes'};
             eid_ = ['https://test.alyx.internationalbrainlab.org/sessions/' testCase.eid];
@@ -118,6 +118,29 @@ classdef test_one < matlab.unittest.TestCase
             % Test without a dataset list should download everything and output a dictionary
             a = testCase.one.load(testCase.eid2);
             testCase.assertTrue(length(a.data) == 5)
+        end
+        
+        function test_load_sessions_fast(testCase)
+            % Here first list 2 sessions that share at least a dataset
+            
+            testCase.one = One('alyx_login', 'test_user', 'alyx_pwd', 'TapetesBloc18',...
+                'alyx_url', 'https://test.alyx.internationalbrainlab.org');
+            dtype = {'channels.rawRow', 'channels.site'};
+            [eids, einfos] = testCase.one.search('data', dtype);
+            d = testCase.one.load(eids{1}, 'data', dtype, 'dclass_output', true);
+            
+            d.local_path
+            
+            
+            testCase.one.load_bulk()
+            
+            
+            einfo = structfun(@(x) x(1), einfos, 'UniformOutput', false);
+            [rr, cs] = testCase.one.load(einfo, 'data', dtype);
+            
+            
+            
+            
         end
         
     end
