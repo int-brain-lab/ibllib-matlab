@@ -103,9 +103,9 @@ h.pl_lab_xr = plot(h.axes_label, [D.cs.xlim NaN 0 0], [0 0 NaN D.cs.ylim], 'Colo
 h.pl_lab_zone = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
 h.pl_lab_zone_lock = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(6));
 h.pl_lab_electrodes(1) = plot(h.axes_label, NaN, NaN, 'linewidth', 2, 'Color', color_from_index(3));
-h.pl_lab_electrodes(2) = plot(h.axes_label, NaN, NaN, 'linewidth', 2, 'Color', color_from_index(4));
+% h.pl_lab_electrodes(2) = plot(h.axes_label, NaN, NaN, 'linewidth', 2, 'Color', color_from_index(4));
 h.pl_lab_electrodes_traj(1) = plot(h.axes_label, NaN, NaN, '--', 'Color', color_from_index(3)); % Full electrode trajectory
-h.pl_lab_electrodes_traj(2) = plot(h.axes_label, NaN, NaN, '--', 'Color', color_from_index(4)); % Full electrode trajectory
+% h.pl_lab_electrodes_traj(2) = plot(h.axes_label, NaN, NaN, '--', 'Color', color_from_index(4)); % Full electrode trajectory
 h.pl_lab_current_elec = plot(h.axes_label, NaN, NaN, '*', 'color', 'm', 'MarkerSize',12);
 xlabel(h.axes_label, 'ML'), ylabel(h.axes_label, 'DV')
 colormap(h.axes_label, cmap)
@@ -276,7 +276,8 @@ ie = D.E.xyz0(:,2)==D.E.xyz0(ie,2);
 % Plot Electrodes
 lineplot = @(xyz0,xyz1,n) flatten([xyz0(:,n) xyz1(:,n) xyz1(:,n).*NaN]');
 % plot 10 degres insertions, active shank and full track
-i1 = D.E.esel & ie & abs(D.E.theta) == 10*pi/180;
+% i1 = D.E.esel & ie & abs(D.E.theta) == 10*pi/180;
+i1 = D.E.esel & ie;
 set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
     'xdata', lineplot(D.E.xyz0(i1,:), D.E.xyz_(i1,:),1),...
     'ydata', lineplot(D.E.xyz0(i1,:), D.E.xyz_(i1,:),3))
@@ -284,13 +285,13 @@ set([h.pl_phy_electrodes_traj(1) h.pl_lab_electrodes_traj(1)],...
     'xdata', lineplot(D.E.xyz_entry(i1,:), D.E.xyz_exit(i1,:),1),...
     'ydata', lineplot(D.E.xyz_entry(i1,:), D.E.xyz_exit(i1,:),3))
 % plot 20 degres insertions, active shank and full track
-i2 = D.E.esel & ie & abs(D.E.theta) == 20*pi/180;
-set([h.pl_phy_electrodes(2) h.pl_lab_electrodes(2)],...
-    'xdata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),1),...
-    'ydata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),3))
-set([h.pl_phy_electrodes_traj(2) h.pl_lab_electrodes_traj(2)],...
-    'xdata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),1),...
-    'ydata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),3))
+% i2 = D.E.esel & ie & abs(D.E.theta) == 20*pi/180;
+% set([h.pl_phy_electrodes(2) h.pl_lab_electrodes(2)],...
+%     'xdata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),1),...
+%     'ydata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),3))
+% set([h.pl_phy_electrodes_traj(2) h.pl_lab_electrodes_traj(2)],...
+%     'xdata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),1),...
+%     'ydata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),3))
 
 
 function fig_main_KeyPressFcn(hobj, evt, h)
