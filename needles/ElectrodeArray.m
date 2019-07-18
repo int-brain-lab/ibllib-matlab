@@ -4,7 +4,7 @@ classdef ElectrodeArray
     
     properties
                                 
-        xyz_entry % into the brain, [3xN]
+        xyz_entry % into the brain [3,N]
         
         xyz_tip % [3,N]
         
@@ -40,6 +40,12 @@ classdef ElectrodeArray
             
         end
         
+        function plot_brain_locs(obj, idx, ax) 
+            % idx is the electrode for which the plot should be made
+            % ax is the axis into which to plot
+            
+        end
         
+            
     end
 end
