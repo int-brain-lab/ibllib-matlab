@@ -12,6 +12,10 @@ function [E, S] = insert_electrodes(V, cs, S, lims, varargin)
 % Y: AP (roll), 3d_dim 
 % Z: DV (yaw), 1st_dim
 
+shallowAngle = 10; 
+deepAngle = 20; 
+
+
 p=inputParser;
 p.addParameter('ax', []);
 p.addParameter('csv', '');
@@ -19,6 +23,7 @@ parse(p,varargin{:});
 for fn = fieldnames(p.Results)'; eval([fn{1} '= p.Results.' (fn{1}) ';']); end
 % Electrodes dans le plan coronal
 len_active_electrode = 3.8 *1e-3;
+% len_active_electrode = 7.7 *1e-3;
 % len_active_electrode = 10 *1e-3;
 len_electrode_tip = 0.3*1e-3; % this is in fact the distance from the bottom of the brain
 len_electrode = 11*1e-3; % fixed electrode length(tip+shank)
@@ -42,8 +47,10 @@ E.theta = E.phi.*0;
 % every insertion site is used twice: 10 and 20 degrees
 ne = size(E.xyz_entry,1);
 E = structfun(@(x) repmat(x,2,1), E, 'UniformOutput', false);
-E.theta(1:ne) = 10/180*pi; % shallow electrodes 10 degrees
-E.theta(ne+1:end) = 20/180*pi; % deep electrodes 20 degrees
+% E.theta(1:ne) = 10/180*pi; % shallow electrodes 10 degrees
+% E.theta(ne+1:end) = 20/180*pi; % deep electrodes 20 degrees
+E.theta(1:ne) = shallowAngle/180*pi; 
+E.theta(ne+1:end) = deepAngle/180*pi; 
 ne = size(E.xyz_entry,1);
 
 % Find the electrodes path using polar coordinates
@@ -67,12 +74,12 @@ E.xyz_exit = probe_sph2cart(E.length, E.theta, E.phi, E.xyz_entry);
 % compute active path part of electrode only
 E.xyz0 = E.xyz_entry.*0;
 % for shallow electrodes entrypoint + active length
-ishallow = (E.theta == 10/180*pi);
+ishallow = (E.theta == shallowAngle/180*pi);
 E.xyz0(ishallow,:) = E.xyz_entry(ishallow,:);
 E.rec_length = min(len_active_electrode, max(0, E.length - len_electrode_tip));
 E.xyz_(ishallow,:) = probe_sph2cart(E.rec_length(ishallow), E.theta(ishallow), E.phi(ishallow), E.xyz0(ishallow,:));
 % for deep electrodes start from bottom - tip and up to the rec length
-isdeep = (E.theta == 20/180*pi);
+isdeep = (E.theta == deepAngle/180*pi);
 E.xyz_(isdeep,:) = probe_sph2cart(-len_electrode_tip, E.theta(isdeep), E.phi(isdeep), E.xyz_exit(isdeep,:));
 E.rec_length(isdeep) = min(len_active_electrode, max(0, E.length(isdeep) - len_electrode_tip));
 E.xyz0(isdeep,:) = probe_sph2cart(-E.rec_length(isdeep), E.theta(isdeep), E.phi(isdeep), E.xyz_(isdeep,:)); 
@@ -112,15 +119,15 @@ if isempty(ax), return, end
 hold(ax, 'on')
 % now display electrodes
 col = get(ax,'colororder');
-hold on, ie = E.theta==10/180*pi & esel;
+hold on, ie = E.theta==shallowAngle/180*pi & esel;
 pl(1) = plot3((E.xyz_entry(ie,1)), (E.xyz_entry(ie,2)), (E.xyz_entry(ie,3)), 'k*', 'parent', ax);          
 pl(2) = plot3((flatten([E.xyz0(ie,1) E.xyz_(ie,1) E.xyz0(ie,1).*NaN ]')) ,...
               (flatten([E.xyz0(ie,2) E.xyz_(ie,2) E.xyz0(ie,2).*NaN ]')), ...
               (flatten([E.xyz0(ie,3) E.xyz_(ie,3) E.xyz0(ie,3).*NaN ]')), ...
                'color', col(4,:), 'parent', ax);
-hold on, ie = E.theta==20/180*pi & esel;
+hold on, ie = E.theta==deepAngle/180*pi & esel;
 pl(3) = plot3((flatten([E.xyz0(ie,1) E.xyz_(ie,1) E.xyz0(ie,1).*NaN ]')) ,...
               (flatten([E.xyz0(ie,2) E.xyz_(ie,2) E.xyz0(ie,2).*NaN ]')), ...
               (flatten([E.xyz0(ie,3) E.xyz_(ie,3) E.xyz0(ie,3).*NaN ]')),...
-              'color', col(5,:), 'parent', ax);
+              'color', col(4,:), 'parent', ax);
 set(pl,'linewidth',1)
