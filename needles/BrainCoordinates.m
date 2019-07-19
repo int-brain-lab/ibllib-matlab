@@ -1,35 +1,40 @@
-classdef CartesianVolume
+classdef BrainCoordinates
+    % X refers to ML
+    % Y refers to AP
+    % Z refers to DV
     properties
         % reference point (0,0,0) in the coordinate space
+        z0 = 0
         x0 = 0
         y0 = 0
-        z0 = 0
         % sampling interval in each direction
+        dz = 1
         dx = 1
         dy = 1
-        dz = 1
         % number of elements for each position
+        nz
         nx
         ny
-        nz
     end
     
     methods
         % Constructor
-        function self = CartesianVolume(V, dxyz, xyz0)
-            % V has dimensions [Nz, Nx, Ny]
+        function self = BrainCoordinates(V, dzyx, zxy0)
+            % V has dimensions [Nz, Nx, Ny] = [DV, ML, AP]
+            % dxyz is a 3 elements vector of spatial resoltion
+            % zxy0 is a 3 elements vector defining the coordinates of V[1,1,1] in real space
             [self.nz, self.nx, self.ny] = size(V);
             if nargin >=3
-                if length(xyz0)==1, xyz0 = xyz0.*[1 1 1]; end
-                self.x0 = xyz0(1);
-                self.y0 = xyz0(2);
-                self.z0 = xyz0(3);
+                if length(zxy0)==1, zxy0 = zxy0.*[1 1 1]; end
+                self.x0 = zxy0(1);
+                self.y0 = zxy0(2);
+                self.z0 = zxy0(3);
             end
             if nargin >=2
-                if length(dxyz)==1, dxyz = dxyz.*[1 1 1]; end
-                self.dx = dxyz(1);
-                self.dy = dxyz(2);
-                self.dz = dxyz(3);
+                if length(dzyx)==1, dzyx = dzyx.*[1 1 1]; end
+                self.dx = dzyx(1);
+                self.dy = dzyx(2);
+                self.dz = dzyx(3);
             end
         end
         
@@ -110,5 +115,16 @@ classdef CartesianVolume
             zs = self.i2z([1:self.nz]');
         end
         
+        
+        function r = res(self)
+        % return the 3 element array for resolution
+           r = [self.dz, self.dx, self.dy]; 
+        end
+        
+         
+        function o = origin(self)
+        % returns the 3 element array of origin 
+            o = [self.z0, self.x0, self.y0];
+        end
     end
 end
