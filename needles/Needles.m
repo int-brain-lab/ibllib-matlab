@@ -61,6 +61,10 @@ set(h.txt_title, 'String', 'Dorr et.al., 2008, High resolution three-dimensional
 lims.ap_lims = [-.009205 .004288]; % Antero Posterior selection (to remove OB and spine) WAXHOLM
 lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]); 
 
+% make a direct orthogonal system with your right hand (thumb, index and middle finger),
+% point the middle finger towards center of Earth
+% If you are standing and your head is straight ahead, your fingers define the directions of ML,AP, DV
+
 % X: ML (pitch), 2nd_dim (left - right +)
 % Y: AP (roll), 3d_dim +-
 % Z: DV (yaw), 1st_dim -+

@@ -1,3 +1,32 @@
 V = rand(20, 10, 5 );
-dxyz = 0.1;
-cs = CartesianVolume(V, dxyz);
+cs = BrainCoordinates(V);
+
+
+
+% test default parameters
+assert(all([cs.i2z(1), cs.i2x(1), cs.i2y(1)] == 0))
+assert(all([cs.i2z(2), cs.i2x(2), cs.i2y(2)] == 1))
+assert(all(cs.iorigin==1))
+
+% test spatial resolutions
+cs = BrainCoordinates(V, 'dzxy', [-0.1 0.1 0.2]);
+assert(all(cs.res == [-0.1 0.1 0.2]))
+assert(all([cs.i2z(1), cs.i2x(1), cs.i2y(1)] == 0))
+assert(all([cs.i2z(2), cs.i2x(2), cs.i2y(2)] == [-0.1 0.1 0.2]))
+assert(all(cs.iorigin==1))
+
+% test origin
+BREGMA = [10 20 30];
+zxy0 = -[cs.i2z(BREGMA(1)), cs.i2x(BREGMA(2)), cs.i2y(BREGMA(3))];
+
+cs = BrainCoordinates(V, 'dzxy', [-0.1 0.1 0.2], 'zxy0', zxy0);
+assert(all([cs.i2z(1), cs.i2x(1), cs.i2y(1)] == zxy0))
+assert(all(cs.res == [-0.1 0.1 0.2]))
+assert(all([cs.i2z(BREGMA(1)), cs.i2x(BREGMA(2)), cs.i2y(BREGMA(3))] == 0))
+
+% create the braincoordinates object with the Bregma as defined above
+bc = BrainCoordinates(vol_labels, 'dzxy', res);
+
+zxy0 = -[bc.i2z(BREGMA(1)), bc.i2x(BREGMA(2)), bc.i2y(BREGMA(3))];
+bc = BrainCoordinates(vol_labels, 'dzxy', res, 'zxy0', zxy0);
+

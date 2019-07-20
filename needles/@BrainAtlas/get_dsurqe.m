@@ -26,6 +26,8 @@ vol_image = flip( permute(vol_image, [3, 1, 2, 4]), 1);
 
 lab_ = readtable(label_file);
 
+% in this Atlas left and right hemishperes are lateralized (ie. different indices)
+% we can choose to keep it this way (lateralize) or to merge the indices for both sides
 if lateralize
 labels.name = [lab_.Structure ; lab_.Structure];
 labels.index = [lab_.rightLabel ; lab_.leftLabel];
@@ -33,14 +35,10 @@ else
     labels.name = lab_.Structure;
     labels.index = lab_.rightLabel;
     for m = 1:length(lab_.leftLabel)
-        V.lab(V.lab==lab_.leftLabel(m)) = lab_.rightLabel(m);
+        vol_labels(vol_labels==lab_.leftLabel(m)) = lab_.rightLabel(m);
     end
 end
 
-% xyz0 = -mean(fv.vertices);
-% THis is the 'COG' of the label vertices
-xyz0 = [-0.00633537645743948 -0.00797709592544222 -0.0051982867355663];
-xyz0 = xyz0 - [ 0 .002623 -.003723]; % BRegma estimate skull
-
-cv = CartesianVolume(V.lab, res, xyz0);
-
+zxy0 = [-0.0051982867355663 -0.00633537645743948 -0.00797709592544222];
+zxy0 = zxy0- [-.003723 0 .002623]; % BRegma estimate skull
+bc = BrainCoordinates(vol_labels, 'dzxy', res, 'zxy0', zxy0);

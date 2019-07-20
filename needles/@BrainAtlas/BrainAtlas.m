@@ -37,7 +37,7 @@ classdef BrainAtlas
     end
     
     methods
-       show(obj) 
+       h = show(obj, h) 
     end
     
     methods (Static)
