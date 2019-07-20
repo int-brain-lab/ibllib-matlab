@@ -54,16 +54,23 @@ classdef ElectrodeArray < handle
             
             spacing = 1e-6; trajX = 0:spacing:10e-3; 
             trajThroughBrain = vec'*trajX+startCoord';
-            lab = labelsAlongVector(atlas, trajThroughBrain');
+            lab = labelsAlongVector(atlas, trajThroughBrain');            
             
             entryIdx = find(lab>0,1);
-            entryZYX = trajThroughBrain(:,entryIdx)';
-            tipZYX = vec*depth+entryZYX;
+            lastIdx = find(lab>0,1,'last');
+            if ~isempty(entryIdx)
+                entryZYX = trajThroughBrain(:,max(1,entryIdx-1))';
+                
+                depthToLast = norm(trajThroughBrain(:,lastIdx)'-entryZYX);
+                depth = min(depth, depthToLast);
+                tipZYX = vec*depth+entryZYX;
+
+                obj.dvmlap_entry(end+1,:) = entryZYX;
+                obj.dvmlap_tip(end+1,:) = tipZYX;
+
+                obj.n = obj.n+1; 
+            end
             
-            obj.dvmlap_entry(end+1,:) = entryZYX;
-            obj.dvmlap_tip(end+1,:) = tipZYX;
-            
-            obj.n = obj.n+1; 
         end
         
         
@@ -97,7 +104,7 @@ classdef ElectrodeArray < handle
             recordArrayTop = max(obj.site_coords(:,2));
             recordArrayBottom = min(obj.site_coords(:,2));
             
-            vectorDir = (tip-entry); 
+            vectorDir = (entry-tip); 
             vectorDir = vectorDir./norm(vectorDir);
             
             vectorEnd = tip+vectorDir*recordArrayBottom;
