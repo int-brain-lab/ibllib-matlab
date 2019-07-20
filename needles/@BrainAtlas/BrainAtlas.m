@@ -9,6 +9,7 @@ classdef BrainAtlas
         surf_top  % top surface of the brain
         surf_bottom  % bottom surface of the brain
         labels % structure with fields 'name' and 'index' where index is a direct mapping of the labels in vol_labels
+        cmap % colormap for vol_labels. set caxis([1 size(cmap,1)]). 
     end
     
     methods
@@ -18,7 +19,7 @@ classdef BrainAtlas
             %   available atlases: allen50
             switch atlas_label
                 case 'allen50'
-                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels] = obj.get_allen(atlas_path, 50);
+                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 50);
                 case 'dsurqe'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels] = obj.get_dsurqe(atlas_path);
                 otherwise
@@ -41,7 +42,7 @@ classdef BrainAtlas
     end
     
     methods (Static)
-        [vlab vim, bc, labels] = get_allen(atlas_path, res_nm)
+        [vlab vim, bc, labels, cmap] = get_allen(atlas_path, res_nm)
         [vlab vim, bc, labels] = get_dsurqe(atlas_path, res_nm)
     end
     
