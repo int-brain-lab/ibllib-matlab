@@ -1,9 +1,9 @@
 
 
-function lab = labelsAlongVector(atlas, zyx_sites)
+function lab = labelsAlongVector(atlas, zxy_sites)
 
 % get labels from those points - convert to indices
-inds = atlas.brain_coor.zxy2iii(zyx_sites);
+inds = atlas.brain_coor.zxy2iii(zxy_sites);
 av = atlas.vol_labels; 
 
 % clip ones that are out of range

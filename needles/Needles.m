@@ -77,7 +77,7 @@ end
 % point the middle finger towards center of Earth
 % If you are standing and your head is straight ahead, your fingers define the directions of ML,AP, DV
 
-% X: ML (pitch), 2nd_dim (left - right +)
+% X: ML (pitch), 2nd_dim (left + right -)
 % Y: AP (roll), 3d_dim +-
 % Z: DV (yaw), 1st_dim -+
 % VOL(Z, X, Y)
