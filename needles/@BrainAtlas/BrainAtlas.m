@@ -1,6 +1,6 @@
 classdef BrainAtlas
-    %BRAINATLAS Summary of this class goes here
-    %   The volume arrays dimension correspond to [DV, ML, AP]
+    % obj = BrainAtlas(atlas_path, atlas_label)
+    % The volume arrays dimension correspond to [DV, ML, AP]
     
     properties
         vol_labels   % labels volume of the brain
@@ -30,10 +30,9 @@ classdef BrainAtlas
             [obj.surf_top, obj.surf_bottom] = deal(zeros(obj.brain_coor.ny, obj.brain_coor.nx));
             for s = 1 : obj.brain_coor.ny
                 [i1,i2] = find(diff(obj.vol_labels(:,:,s) == 0,1,1));
-                S.top(s,:) = accumarray(i2, i1, [obj.brain_coor.nx 1], @min, NaN);
-                S.bottom(s,:) = accumarray(i2, i1, [obj.brain_coor.nx 1], @max, NaN);
+                obj.surf_top(s,:) = accumarray(i2, i1, [obj.brain_coor.nx 1], @min, NaN);
+                obj.surf_bottom(s,:) = accumarray(i2, i1, [obj.brain_coor.nx 1], @max, NaN);
             end
-            
         end
     end
     

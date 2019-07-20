@@ -53,13 +53,25 @@ message = {'International Brain Laboratory', ...
 f = msgbox(message, ['Needles v' h.ver])
 
 
-function menu_file_loadatlas_Callback(hobj, evt, h)
+function menu_file_dsurqe_Callback(hObject, eventdata, h)
+load_atlas(h, 'dsurqe')
+
+function menu_file_allen50_Callback(hobj, evt, h)
+load_atlas(h, 'allen50')
+
+function load_atlas(h, atlas_label)
 cmap = 'bone';
-[D.V, ~, D.cs, D.labels] = brainatlas.get_dsurqe(h.pref.path_atlas, 'lateralize', h.pref.lateralize, 'display', false);
-[D.S] = brainatlas.get_top_bottom(D.V, D.cs);
-set(h.txt_title, 'String', 'Dorr et.al., 2008, High resolution three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J mice.')
-lims.ap_lims = [-.009205 .004288]; % Antero Posterior selection (to remove OB and spine) WAXHOLM
-lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]); 
+D.atlas = BrainAtlas(h.pref.(atlas_label).path, atlas_label);
+switch atlas_label
+    case 'dsurqe'
+        set(h.txt_title, 'String', 'Dorr et.al., 2008, High resolution three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J mice.')
+        lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]); 
+    case 'allen50'
+        set(h.txt_title, 'String', 'Allen Brain Institute CCF')
+        lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]); 
+    case 'waxholm'
+        lims = struct('ap_lims', [-.009205 .004288], 'ml_lims', [-0.004 0.004]); 
+end
 
 % make a direct orthogonal system with your right hand (thumb, index and middle finger),
 % point the middle finger towards center of Earth
@@ -69,27 +81,28 @@ lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]
 % Y: AP (roll), 3d_dim +-
 % Z: DV (yaw), 1st_dim -+
 % VOL(Z, X, Y)
-[D.E] = insert_electrodes(D.V, D.cs, D.S, lims);
+[D.E] = insert_electrodes(D.atlas, lims);
 
+bc = D.atlas.brain_coor;
 % Create all the objects depending on the top axes
-h.im_top = imagesc(D.cs.yscale, D.cs.xscale, D.S.top', 'Parent', h.axes_top);
+h.im_top = imagesc(bc.yscale, bc.xscale, D.atlas.surf_top', 'Parent', h.axes_top);
 set(h.axes_top, 'ydir', 'normal','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
-set(h.axes_top,'UserData', round(D.cs.y2i(0))) % WIndow motion callback
+set(h.axes_top,'UserData', round(bc.y2i(0))) % WIndow motion callback
 xlabel(h.axes_top, 'AP'), ylabel(h.axes_top, 'ML')
 colormap(h.axes_top, cmap);
 h.pl_top_origin = plot(h.axes_top, 0,0, 'r+');
 h.pl_top_zone_lock = plot(h.axes_top, NaN, 0,'.','MarkerSize',5,'Color',color_from_index(6));
-h.pl_top_apline = plot(h.axes_top, [0 0], [D.cs.xlim], 'color', color_from_index(2));
+h.pl_top_apline = plot(h.axes_top, [0 0], [bc.xlim], 'color', color_from_index(2));
 set(h.pl_top_apline, 'ButtonDownFcn', @pl_top_apline_ButtonDownFcn)
 h.pl_top_electrodes = plot(h.axes_top, D.E.xyz_entry(D.E.esel,2), D.E.xyz_entry(D.E.esel,1), '.', ...
 'ButtonDownFcn', @pl_top_electrodes_ButtonDownFcn, 'MarkerSize', 10, 'Color','w');
 h.pl_top_current_elec = plot(h.axes_top, NaN, NaN, '*', 'color', 'm', 'MarkerSize',12);
 
 % Create all the objects depending on the contrast axes
-h.im_phy = imagesc(D.cs.xscale, D.cs.zscale,  D.V.phy(:,:,round(D.cs.y2i(0))), 'Parent', h.axes_phy);
+h.im_phy = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_image(:,:,round(bc.y2i(0))), 'Parent', h.axes_phy);
 set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add')
 h.pl_phy_origin = plot(h.axes_phy, 0,0, 'r+');
-h.pl_phy_xr = plot(h.axes_phy, [D.cs.xlim NaN 0 0], [0 0 NaN D.cs.ylim], 'Color', color_from_index(2));
+h.pl_phy_xr = plot(h.axes_phy, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_phy_zone = plot(h.axes_phy, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
 h.pl_phy_zone_lock = plot(h.axes_phy, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(6));
 h.pl_phy_electrodes(1) = plot(h.axes_phy, NaN, NaN, 'linewidth', 2, 'Color', color_from_index(3));
@@ -100,10 +113,10 @@ h.pl_phy_current_elec = plot(h.axes_phy, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 xlabel(h.axes_phy, 'ML'), ylabel(h.axes_phy, 'DV')
 colormap(h.axes_phy, cmap)
 % Create all the objects depending on the label axes
-h.im_lab = imagesc(D.cs.xscale, D.cs.zscale,  D.V.lab(:,:,round(D.cs.y2i(0))), 'Parent', h.axes_label);
+h.im_lab = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
 set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add')
 h.pl_lab_origin = plot(h.axes_label, 0,0, 'r+');
-h.pl_lab_xr = plot(h.axes_label, [D.cs.xlim NaN 0 0], [0 0 NaN D.cs.ylim], 'Color', color_from_index(2));
+h.pl_lab_xr = plot(h.axes_label, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_lab_zone = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
 h.pl_lab_zone_lock = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(6));
 h.pl_lab_electrodes(1) = plot(h.axes_label, NaN, NaN, 'linewidth', 2, 'Color', color_from_index(3));
@@ -117,7 +130,7 @@ colormap(h.axes_label, cmap)
 set([h.pl_phy_xr, h.pl_lab_xr, h.pl_phy_zone, h.pl_lab_zone], 'Visible', 'Off')
 set(h.fig_main,'WindowButtonMotionFcn', {@fig_main_WindowButtonMotionFcn, h})
 % prevents from re-loading the Atlas for the time being
-set(h.menu_file_loadatlas, 'enable', 'off')
+set([h.menu_file_allen50, h.menu_file_dsurqe], 'Enable', 'off')
 h.txt_top_apline = text(NaN, NaN, '', 'Parent', h.axes_top, 'Color', color_from_index(2),'Fontsize',12, 'Fontweight', 'bold');
 guidata(h.fig_main, h)
 setappdata(h.fig_main, 'Data', D)
@@ -133,6 +146,7 @@ setappdata(h.fig_main, 'Data', D)
 function pl_top_electrodes_ButtonDownFcn(hobj, evt)
 h = guidata(hobj);
 D = getappdata(h.fig_main, 'Data');
+bc = D.atlas.brain_coor;
 ie = find((abs(evt.Source.XData-evt.IntersectionPoint(1)) < 1e-9) & ...
 (abs(evt.Source.YData-evt.IntersectionPoint(2)) < 1e-9));
 % Find the electrode index from the plot to the data structure
@@ -140,7 +154,7 @@ esel = find(D.E.esel);
 ie = esel(ie);
 ap_current =D.E.xyz0(ie(1),2);
 Update_Slices(h.fig_main, [], ap_current);
-set(h.axes_top,'UserData', round(D.cs.y2i(ap_current(1))))
+set(h.axes_top,'UserData', round(bc.y2i(ap_current(1))))
 Update_txt_electrodes(hobj, ie);
 set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
     'xdata', D.E.xyz_entry(ie,1), 'ydata', D.E.xyz_entry(ie,3))
@@ -151,12 +165,13 @@ set( h.pl_top_current_elec,'Visible', 'on',...
 function pl_zone_ButtonDownFcn(hobj, evt)
 h = guidata(hobj);
 D = getappdata(h.fig_main,'Data');
+bc = D.atlas.brain_coor;
 plock = [h.pl_lab_zone_lock h.pl_phy_zone_lock];
 labind = get(h.pl_lab_zone, 'userdata');
 set(plock,'xdata', get(h.pl_lab_zone, 'xdata') ,'ydata', get(h.pl_lab_zone, 'ydata'), 'userdata', labind)
 set(h.txt_labels_lock, 'String', get(h.txt_labels, 'string'), 'Visible', 'on')
-[iml, iap] = find(squeeze(sum(D.V.lab(:,:,:)== labind, 1)));
-set(h.pl_top_zone_lock, 'xdata', D.cs.i2y(iap), 'ydata', D.cs.i2x(iml))
+[iml, iap] = find(squeeze(sum(D.atlas.vol_labels(:,:,:)== labind, 1)));
+set(h.pl_top_zone_lock, 'xdata', bc.i2y(iap), 'ydata', bc.i2x(iml))
 
 
 function pl_top_apline_ButtonDownFcn(hobj, evt)
@@ -170,9 +185,10 @@ set([h.txt_labels], 'String', '')
 function pl_top_apline_ButtonUpFcn(hobj, evt)
 h = guidata(hobj);
 D = getappdata(hobj, 'Data');
+bc = D.atlas.brain_coor;
 ap_current = get(h.pl_top_apline, 'xdata');
 Update_Slices(h.fig_main, [], ap_current)
-set(h.axes_top,'UserData', round(D.cs.y2i(ap_current(1))))
+set(h.axes_top,'UserData', round(bc.y2i(ap_current(1))))
 set(h.fig_main, 'WindowButtonUpFcn', '')
 
 
@@ -208,9 +224,10 @@ Update_txt_xyz(h.txt_xyz, NaN, ap(1), NaN);
 function Update_CrossHairs(hobj, evt, ml_dv)
 h = guidata(hobj);
 D = getappdata(hobj, 'Data');
+bc = D.atlas.brain_coor;
 set([h.pl_phy_xr, h.pl_lab_xr, h.pl_phy_zone, h.pl_lab_zone], 'Visible', 'On')
-set( [h.pl_lab_xr, h.pl_phy_xr], 'xdata', [D.cs.xlim NaN ml_dv([1 1])],...
-    'ydata', [ml_dv([2 2]) NaN D.cs.ylim]);
+set( [h.pl_lab_xr, h.pl_phy_xr], 'xdata', [bc.xlim NaN ml_dv([1 1])],...
+    'ydata', [ml_dv([2 2]) NaN bc.ylim]);
 ap = get(h.pl_top_apline, 'Xdata');
 Update_txt_xyz(h.txt_xyz, ml_dv(1), ap(1), ml_dv(2));
 
@@ -240,12 +257,13 @@ set(h.txt_xyz, 'String', {[num2str(ml.*1e3, '%6.3f ML (mm)')],'',...
 function Update_Labels(hobj, evt, ml_dv)
 h = guidata(hobj);
 D = getappdata(hobj, 'Data');
-yi = round(D.cs.y2i(get(h.pl_top_apline,'xdata')));
-labind = D.V.lab(  round(D.cs.z2i(ml_dv(2))), round(D.cs.x2i(ml_dv(1))), yi(1));
+bc = D.atlas.brain_coor;
+yi = round(bc.y2i(get(h.pl_top_apline,'xdata')));
+labind = D.atlas.vol_labels(  round(bc.z2i(ml_dv(2))), round(bc.x2i(ml_dv(1))), yi(1));
 if labind==0, return, end
-[x,z]= find(D.V.lab(:,:,yi)== labind);
-set([h.pl_phy_zone h.pl_lab_zone], 'xdata', D.cs.i2x(z), 'ydata', D.cs.i2z(x), 'visible', 'on', 'UserData', labind)
-structure = D.labels.name{D.labels.index==labind};
+[x,z]= find(D.atlas.vol_labels(:,:,yi)== labind);
+set([h.pl_phy_zone h.pl_lab_zone], 'xdata', bc.i2x(z), 'ydata', bc.i2z(x), 'visible', 'on', 'UserData', labind)
+structure = D.atlas.labels.name{D.atlas.labels.index==labind};
 try
     set(h.txt_labels, 'String', structure, 'Visible', 'On')
 catch
@@ -256,23 +274,24 @@ end
 function Update_Slices(hobj, evt, ap)
 D = getappdata(hobj, 'Data');
 h = guidata(hobj);
+bc = D.atlas.brain_coor;
 % from the top axis handle line and associated text
 set(h.pl_top_apline, 'Xdata', ap([1 1]));
-ytxt = max(D.cs.xlim) - diff(D.cs.xlim)*0.05;
+ytxt = max(bc.xlim) - diff(bc.xlim)*0.05;
 set(h.txt_top_apline, 'String', num2str(ap(1)*1e3, '%6.3f (mm) AP'), 'Position', [ap(1) ytxt 0])
-ap_slice = round(D.cs.y2i( ap(1)) );
+ap_slice = round(bc.y2i( ap(1)) );
 % display the coronal slices on the physio and MRI axes
-if between(ap_slice,[1 D.cs.ny])
-    set(h.im_phy, 'CData', D.V.phy(:,:,ap_slice))
-    set(h.im_lab, 'CData', D.V.lab(:,:,ap_slice))
+if between(ap_slice,[1 bc.ny])
+    set(h.im_phy, 'CData', D.atlas.vol_image(:,:,ap_slice))
+    set(h.im_lab, 'CData', D.atlas.vol_labels(:,:,ap_slice))
 end
 set([h.pl_lab_zone, h.pl_phy_zone], 'visible', 'off')
 set([h.pl_phy_current_elec h.pl_lab_current_elec], 'visible', 'off')
 % Update the current locked zone if any
 labind = get(h.pl_lab_zone_lock, 'Userdata');
 if ~isempty(labind)
-    [x,z]= find(D.V.lab(:,:,ap_slice)== labind);
-    set([h.pl_phy_zone_lock h.pl_lab_zone_lock], 'xdata', D.cs.i2x(z), 'ydata', D.cs.i2z(x))
+    [x,z]= find(D.atlas.vol_labels(:,:,ap_slice)== labind);
+    set([h.pl_phy_zone_lock h.pl_lab_zone_lock], 'xdata', bc.i2x(z), 'ydata', bc.i2z(x))
 end
 % Find the electrodes from the closest coronal plane
 [d, ie] = min(abs(ap(1) -  D.E.xyz0(:,2)));
@@ -313,14 +332,15 @@ switch true
         ap_new = dap (find(dap > 0 , 1 , 'first')) + ap(1);
         % lock to posterior electrode plane
     case strcmp(evt.Key, 'leftarrow')
-        ap_slice = round(D.cs.y2i( ap(1)) ) - 1;
-        ap_new = D.cs.i2y(ap_slice);
+        ap_slice = round(bc.y2i( ap(1)) ) - 1;
+        ap_new = bc.i2y(ap_slice);
         % lock to anterior electrode plane
     case strcmp(evt.Key, 'rightarrow')
-        ap_slice = round(D.cs.y2i( ap(1)) ) + 1;
-        ap_new = D.cs.i2y(ap_slice);
+        ap_slice = round(bc.y2i( ap(1)) ) + 1;
+        ap_new = bc.i2y(ap_slice);
     otherwise, return
 end
 
 Update_Slices(hobj, [], ap_new)
 Update_txt_xyz(hobj, NaN,  ap_new, NaN)
+
