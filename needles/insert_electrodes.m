@@ -1,5 +1,5 @@
-function [E, S] = insert_electrodes(V, cs, S, lims, varargin)
-% [E, S] = insert_electrodes(V, cs, S, lims)
+function [E, S] = insert_electrodes(atlas, lims, varargin)
+% [E, S] = insert_electrodes(vol_label, cs, S, lims)
 % V: Brain Atlas Volume, struct with fields phy and lab: for example
 %     phy: [241×315×478 single]
 %     lab: [241×315×478 single]
@@ -14,10 +14,9 @@ function [E, S] = insert_electrodes(V, cs, S, lims, varargin)
 
 shallowAngle = 10; 
 deepAngle = 20; 
-
+bc = atlas.brain_coor;
 
 p=inputParser;
-p.addParameter('ax', []);
 p.addParameter('csv', '');
 parse(p,varargin{:});
 for fn = fieldnames(p.Results)'; eval([fn{1} '= p.Results.' (fn{1}) ';']); end
@@ -32,11 +31,11 @@ theta = 10/180*pi; % insertion is 10 degrees here
 delec = 0.5*1e-3; % we start with a grid of half mm
 % create a mesh of electrodes, extract the z coordinate from the brain surface
 E = [];
-[y_, x_] = meshgrid([0:delec:cs.ly]+cs.y0, [0:delec:cs.lx]+cs.x0);
-p_ = round((x_-cs.x0)/delec)*24 + 2000; % line is the coronal slice number
-l_ = round((y_-cs.y0)/delec)*24 + 5000; % point is the sagital slice number
+[y_, x_] = meshgrid([0:delec:bc.ly]+bc.y0, [0:delec:bc.lx]+bc.x0);
+p_ = round((x_-bc.x0)/delec)*24 + 2000; % line is the coronal slice number
+l_ = round((y_-bc.y0)/delec)*24 + 5000; % point is the sagital slice number
 % project x_ and y_ on the brain surface
-z_ = cs.i2z(interp2(S.top, cs.x2i(x_), cs.y2i(y_)));
+z_ = bc.i2z(interp2(atlas.surf_top, bc.x2i(x_), bc.y2i(y_)));
 % we keep only entry points that intersect the top surface
 ind2keep = ~isnan(z_(:));
 E.xyz_entry = [x_(ind2keep), y_(ind2keep), z_(ind2keep)];
@@ -58,11 +57,11 @@ r = len_electrode; % fixed electrode length (tip+sites)
 E.xyz_ = probe_sph2cart(r, E.theta, E.phi, E.xyz_entry);
 
 % get a uniform sampling of points along the electrode paths to compute exit point
-nr = ceil(len_electrode*4/cs.dx); % number of sample points along the path
-X_ = cs.x2i(bsxfun(@plus, (E.xyz_(:,1) - E.xyz_entry(:,1))*linspace(0,1,nr), E.xyz_entry(:,1)));
-Y_ = cs.y2i(bsxfun(@plus, (E.xyz_(:,2) - E.xyz_entry(:,2))*linspace(0,1,nr), E.xyz_entry(:,2)));
-Z_ = cs.z2i(bsxfun(@plus, (E.xyz_(:,3) - E.xyz_entry(:,3))*linspace(0,1,nr), E.xyz_entry(:,3)));
-E.labels = interp3(V.lab, X_, Z_, Y_, 'nearest'); %extract the indices from the volume
+nr = ceil(len_electrode*4/bc.dx); % number of sample points along the path
+X_ = bc.x2i(bsxfun(@plus, (E.xyz_(:,1) - E.xyz_entry(:,1))*linspace(0,1,nr), E.xyz_entry(:,1)));
+Y_ = bc.y2i(bsxfun(@plus, (E.xyz_(:,2) - E.xyz_entry(:,2))*linspace(0,1,nr), E.xyz_entry(:,2)));
+Z_ = bc.z2i(bsxfun(@plus, (E.xyz_(:,3) - E.xyz_entry(:,3))*linspace(0,1,nr), E.xyz_entry(:,3)));
+E.labels = interp3(atlas.vol_labels, X_, Z_, Y_, 'nearest'); %extract the indices from the volume
 % if all points are 0 this is a dud but this shouldn't happen as each
 % electrode has a point of entry on the top surface
 % assert(~any(all(E.v==0,2)))
@@ -86,48 +85,29 @@ E.xyz0(isdeep,:) = probe_sph2cart(-E.rec_length(isdeep), E.theta(isdeep), E.phi(
 
 
 
-
-if ~exist('display', 'var'), display = true; end
 % 3D plot overlay
 min_rec_length_mm = 2.5; % if probe insertion is smaller than than, discard
 mid_line_exclusion_mm = 0.4; % get away from mid-line vascular system
 
 
 % first take only the right side to have insertions towards medial plane
-esel= cs.x2i(E.xyz_entry(:,1)) <= cs.nx/2;
+esel= bc.x2i(E.xyz_entry(:,1)) <= bc.nx/2;
 esel = esel & E.rec_length > (min_rec_length_mm/1000); % prune according to the recording length
 esel = esel & between(E.xyz_entry(:,2), lims.ap_lims); % Remove olphactory bulb
 esel = esel & between(E.xyz_entry(:,1), lims.ml_lims); % REmove lateral electrodes
 % remove insertions too close to the midline vascular system
-esel = esel & ~between(E.xyz_entry(:,1), cs.i2x(cs.nx/2)+[-1 1].*mid_line_exclusion_mm/1000);
+esel = esel & ~between(E.xyz_entry(:,1), bc.i2x(bc.nx/2)+[-1 1].*mid_line_exclusion_mm/1000);
 % save the selections in the structure
 E = structfun(@(x) x(esel,:), E, 'UniformOutput', false);
 E.esel = logical(E.rec_length * 0 +1);
 
-if csv
-    % save csv
-    CSV_IMPLANTS = 'implantations.csv';
-    T = [E.Line, E.Point, E.xyz_entry.*1e3 E.theta.*180/pi E.phi E.length.*1000 E.rec_length.*1000];
-    csv_head = ['Line, Point, X_mm, Y_mm, Z_mm, Theta_deg, Phi_deg, Length_mm, Rec_length_mm' char(10)];
-    T = sortrows(T(esel,:), [2 1 4]);
-    fid = fopen(CSV_IMPLANTS,'w+'); fwrite(fid, csv_head); fclose(fid);
-    dlmwrite('implantations.csv', T,'-append')
-end
+% if csv
+%     % save csv
+%     CSV_IMPLANTS = 'implantations.csv';
+%     T = [E.Line, E.Point, E.xyz_entry.*1e3 E.theta.*180/pi E.phi E.length.*1000 E.rec_length.*1000];
+%     csv_head = ['Line, Point, X_mm, Y_mm, Z_mm, Theta_deg, Phi_deg, Length_mm, Rec_length_mm' char(10)];
+%     T = sortrows(T(esel,:), [2 1 4]);
+%     fid = fopen(CSV_IMPLANTS,'w+'); fwrite(fid, csv_head); fclose(fid);
+%     dlmwrite('implantations.csv', T,'-append')
+% end
 
-if isempty(ax), return, end
-
-hold(ax, 'on')
-% now display electrodes
-col = get(ax,'colororder');
-hold on, ie = E.theta==shallowAngle/180*pi & esel;
-pl(1) = plot3((E.xyz_entry(ie,1)), (E.xyz_entry(ie,2)), (E.xyz_entry(ie,3)), 'k*', 'parent', ax);          
-pl(2) = plot3((flatten([E.xyz0(ie,1) E.xyz_(ie,1) E.xyz0(ie,1).*NaN ]')) ,...
-              (flatten([E.xyz0(ie,2) E.xyz_(ie,2) E.xyz0(ie,2).*NaN ]')), ...
-              (flatten([E.xyz0(ie,3) E.xyz_(ie,3) E.xyz0(ie,3).*NaN ]')), ...
-               'color', col(4,:), 'parent', ax);
-hold on, ie = E.theta==deepAngle/180*pi & esel;
-pl(3) = plot3((flatten([E.xyz0(ie,1) E.xyz_(ie,1) E.xyz0(ie,1).*NaN ]')) ,...
-              (flatten([E.xyz0(ie,2) E.xyz_(ie,2) E.xyz0(ie,2).*NaN ]')), ...
-              (flatten([E.xyz0(ie,3) E.xyz_(ie,3) E.xyz0(ie,3).*NaN ]')),...
-              'color', col(4,:), 'parent', ax);
-set(pl,'linewidth',1)

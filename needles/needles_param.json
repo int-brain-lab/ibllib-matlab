@@ -1,4 +1,9 @@
 {
- "path_atlas": "/datadisk/BrainAtlas/ATLASES/DSURQE_40micron",
- "lateralize": true
+  "allen50": {
+    "path": "/datadisk/BrainAtlas/ATLASES/Allen"
+  },
+  "dsurqe": {
+    "path": "/datadisk/BrainAtlas/ATLASES/DSURQE_40micron",
+    "lateralize": true
+  }
 }

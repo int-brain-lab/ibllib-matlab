@@ -41,9 +41,9 @@ zxy0 = -[bc.i2z(BREGMA(1)), bc.i2x(BREGMA(2)), bc.i2y(BREGMA(3))];
 bc = BrainCoordinates(vol_labels, 'dzxy', res, 'zxy0', zxy0);
 
 % make the colormap
-q = labels.color_hex_triplet;
-c1 = cellfun(@(x)hex2dec(x(1:2)), q, 'uni', false);
-c2 = cellfun(@(x)hex2dec(x(3:4)), q, 'uni', false);
-c3 = cellfun(@(x)hex2dec(x(5:6)), q, 'uni', false);
-cmap = horzcat(vertcat(c1{:}),vertcat(c2{:}),vertcat(c3{:}))./255;
-
+% q = labels.color_hex_triplet;
+% c1 = cellfun(@(x)hex2dec(x(1:2)), q, 'uni', false);
+% c2 = cellfun(@(x)hex2dec(x(3:4)), q, 'uni', false);
+% c3 = cellfun(@(x)hex2dec(x(5:6)), q, 'uni', false);
+% cmap = horzcat(vertcat(c1{:}),vertcat(c2{:}),vertcat(c3{:}))./255;
+cmap = []

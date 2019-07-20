@@ -11,12 +11,12 @@ parse(p,varargin{:});
 parse(p,varargin{:});
 for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
 %https://scalablebrainatlas.incf.org/mouse/WHS12
-nii_file = [atlas_path filesep 'DSURQE_40micron_average.nii'];
-nii_file = [atlas_path filesep 'DSURQE_40micron_labels.nii'];
+nii_file_image = [atlas_path filesep 'DSURQE_40micron_average.nii'];
+nii_file_labels = [atlas_path filesep 'DSURQE_40micron_labels.nii'];
 label_file = [atlas_path filesep 'DSURQE_40micron_R_mapping.csv'];
 
-vol_image = io.read.nii(nii_file);
-[vol_labels, H] = io.read.nii(nii_file);
+vol_image = io.read.nii(nii_file_image);
+[vol_labels, H] = io.read.nii(nii_file_labels);
 
 res = H.PixelDimensions(1)/1e3;
 assert(all( H.PixelDimensions(1:3) - H.PixelDimensions(1)< eps))
