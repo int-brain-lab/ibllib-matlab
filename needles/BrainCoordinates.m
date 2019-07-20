@@ -124,10 +124,18 @@ classdef BrainCoordinates
            r = [self.dz, self.dx, self.dy]; 
         end
         
-         
+        
+        function zxy = iii2zxy(self, iii)
+            zxy = [self.i2z(iii(:,1)), self.i2x(iii(:,2)), self.i2y(iii(:,3))];
+        end
+        
+        function zxy = zxy2iii(self, iii)
+            zxy = [self.z2i(iii(:,1)), self.x2i(iii(:,2)), self.y2i(iii(:,3))];
+        end
+        
         function o = iorigin(self)
         % returns the 3 element array of origin 
-            o = [self.z2i(0), self.x2i(0), self.y2i(0)];
+            o = self.zxy2iii([0,0,0]);
         end
     end
 end
