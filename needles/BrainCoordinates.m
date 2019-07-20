@@ -3,7 +3,7 @@ classdef BrainCoordinates
     % Y refers to AP
     % Z refers to DV
     properties
-        % reference point (0,0,0) in the coordinate space
+        % coordinates of the element V(1,1,1) in the coordinate space
         z0 = 0
         x0 = 0
         y0 = 0
@@ -19,23 +19,26 @@ classdef BrainCoordinates
     
     methods
         % Constructor
-        function self = BrainCoordinates(V, dzyx, zxy0)
+        function self = BrainCoordinates(V, varargin)
+            % dzyx, zxy0
+            p = inputParser;
+            p.addParameter('dzxy',  1, @isnumeric);
+            p.addParameter('zxy0',  0, @isnumeric);
+            % by default we assume just 2 sites to have a recording length 3.5mm from the tip
+            p.parse(varargin{:});
+            for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
             % V has dimensions [Nz, Nx, Ny] = [DV, ML, AP]
             % dxyz is a 3 elements vector of spatial resoltion
             % zxy0 is a 3 elements vector defining the coordinates of V[1,1,1] in real space
-            [self.nz, self.nx, self.ny] = size(V);
-            if nargin >=3
-                if length(zxy0)==1, zxy0 = zxy0.*[1 1 1]; end
-                self.x0 = zxy0(1);
-                self.y0 = zxy0(2);
-                self.z0 = zxy0(3);
-            end
-            if nargin >=2
-                if length(dzyx)==1, dzyx = dzyx.*[1 1 1]; end
-                self.dx = dzyx(1);
-                self.dy = dzyx(2);
-                self.dz = dzyx(3);
-            end
+            [self.nz, self.nx, self.ny] = size(V);            
+            if length(dzxy)==1, dzxy = dzxy.*[1 1 1]; end
+            self.dx = dzxy(2);
+            self.dy = dzxy(3);
+            self.dz = dzxy(1);
+            if length(zxy0)==1, zxy0 = zxy0.*[1 1 1]; end
+            self.x0 = zxy0(2); %- self.dx;
+            self.y0 = zxy0(3); %- self.dy;
+            self.z0 = zxy0(1); %- self.dz;
         end
         
         % Methods distance to indice
@@ -122,9 +125,9 @@ classdef BrainCoordinates
         end
         
          
-        function o = origin(self)
+        function o = iorigin(self)
         % returns the 3 element array of origin 
-            o = [self.z0, self.x0, self.y0];
+            o = [self.z2i(0), self.x2i(0), self.y2i(0)];
         end
     end
 end

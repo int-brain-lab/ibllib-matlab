@@ -27,5 +27,11 @@ for m = 1:length(ind)
     vol_labels(vol_labels==id(m)) = ind(m)-1;
 end
 
+
+BREGMA = (BREGMA * 10/res_um);
+
 % create the braincoordinates object with the Bregma as defined above
-bc = BrainCoordinates(vol_labels, res, BREGMA * 10/res_um);
+bc = BrainCoordinates(vol_labels, 'dzxy', res);
+
+zxy0 = -[bc.i2z(BREGMA(1)), bc.i2x(BREGMA(2)), bc.i2y(BREGMA(3))];
+bc = BrainCoordinates(vol_labels, 'dzxy', res, 'zxy0', zxy0);

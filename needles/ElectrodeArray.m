@@ -17,8 +17,8 @@ classdef ElectrodeArray
             % 2nd dim = y = along the shank
             % 3rd dim = z = out of plane of the shank (un-used for neuropixels)
             
-        coronal_index
-        sagittal_index
+        coronal_index  % line number in a grid
+        sagittal_index  % point number in a grid
     end
     
     methods
