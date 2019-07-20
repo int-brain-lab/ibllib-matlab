@@ -58,9 +58,11 @@ classdef ElectrodeArray
             
         end
         
-        function plot_brain_locs(obj, ide, ax) 
+        function plot_brain_locs(obj, idx, ax, atlas) 
             % idx is the electrode for which the plot should be made
             % ax is the axis into which to plot
+            
+            
             
         end
         
