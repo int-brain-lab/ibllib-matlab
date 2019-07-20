@@ -9,7 +9,7 @@ classdef BrainAtlas
         surf_top  % top surface of the brain
         surf_bottom  % bottom surface of the brain
         labels % structure with fields 'name' and 'index' where index is a direct mapping of the labels in vol_labels
-        cmap % colormap for vol_labels. set caxis([1 size(cmap,1)]). 
+        cmap % colormap for vol_labels. set caxis([0 size(cmap,1)-1]). 
     end
     
     methods

@@ -2,9 +2,11 @@ function h = show(self, h)
 % display a 3D rendering of the brain
 
 
-fv = isosurface(self.vol_labels , 0.5);
+fv = isosurface(double(self.vol_labels) , 0.5);
 % in this case the volume is out in pixel unit, convert to SI
-fv.vertices = bsxfun( @minus, fv.vertices, self.brain_coor.iorigin);
+iorigin = self.brain_coor.iorigin;
+iorigin = iorigin([2 1 3]); 
+fv.vertices = bsxfun( @minus, fv.vertices, iorigin);
 fv.vertices = fv.vertices.* self.brain_coor.res;
 
 if nargin <=1

@@ -29,7 +29,7 @@ for m = 1:length(id)
     else
         ind = find(labels.id==id(m));
     end
-    vol_labels(vol_labels_orig==id(m)) = ind;    
+    vol_labels(vol_labels_orig==id(m)) = ind-1;    
 end
 
 BREGMA = (BREGMA * 10/res_um);
