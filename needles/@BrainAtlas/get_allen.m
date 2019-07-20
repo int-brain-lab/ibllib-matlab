@@ -4,7 +4,7 @@ function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_u
 % http://help.brain-map.org/display/mousebrain/API#API-DownloadImages
 % http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/
 
-BREGMA = [0, 570, 540]; % Bregma indices DV ML AP for the 10nm Atlas
+BREGMA = [0, 570, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
 
 if ~exist('res_um', 'var'), res_um = 50; end
 file_label_csv = [atlas_path filesep 'structure_tree_safe_2017.csv'];
