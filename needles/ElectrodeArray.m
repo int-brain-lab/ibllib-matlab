@@ -1,6 +1,6 @@
 
 
-classdef ElectrodeArray
+classdef ElectrodeArray < handle
     
     properties
         n % number of probes                        
@@ -37,6 +37,35 @@ classdef ElectrodeArray
             for fn = fieldnames(p.Results)', eval(['self.' fn{1} '= p.Results.' (fn{1}) ';']); end
         end
         
+        function obj = add_probe_by_start_angles(obj, startCoord, angles, depth, atlas)
+            % angles are [yaw pitch roll] from the P->A axis. Roll doesn't
+            % determine the vector but is stored. Depth is relative to
+            % surface of the brain. At atlas is required to find the
+            % insertion location. Positive yaw goes to the right (CW from
+            % above), positive pitch goes down (CW from the right)
+            % *** for now it only works in the coronal plane, i.e. yaw is
+            % not enabled
+            
+            % Z X Y is DV LR AP
+            
+            
+            a = sind(angles(2)); b = cosd(angles(2));
+            vec = [a b 0];
+            
+            spacing = 1e-6; trajX = 0:spacing:10e-3; 
+            trajThroughBrain = vec'*trajX+startCoord';
+            lab = labelsAlongVector(atlas, trajThroughBrain');
+            
+            entryIdx = find(lab>0,1);
+            entryZYX = trajThroughBrain(:,entryIdx)';
+            tipZYX = vec*depth+entryZYX;
+            
+            obj.dvmlap_entry(end+1,:) = entryZYX;
+            obj.dvmlap_tip(end+1,:) = tipZYX;
+            
+            obj.n = obj.n+1; 
+        end
+        
         
         function dvmlap = dvmlap_exit(obj) % out of the brain
             
@@ -58,11 +87,23 @@ classdef ElectrodeArray
             
         end
         
-        function plot_brain_locs(obj, idx, ax, atlas) 
+        function plot_brain_loc(obj, idx, ax, atlas) 
             % idx is the electrode for which the plot should be made
             % ax is the axis into which to plot
             
+            tip = obj.dvmlap_tip(idx,:); 
+            entry = obj.dvmlap_entry(idx,:);
             
+            recordArrayTop = max(obj.site_coords(:,2));
+            recordArrayBottom = min(obj.site_coords(:,2));
+            
+            vectorDir = (tip-entry); 
+            vectorDir = vectorDir./norm(vectorDir);
+            
+            vectorEnd = tip+vectorDir*recordArrayBottom;
+            vectorStart = tip+vectorDir*recordArrayTop;
+            
+            plotTrajectory(ax, atlas, vectorStart, vectorEnd);
             
         end
         

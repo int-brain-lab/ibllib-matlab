@@ -20,7 +20,7 @@ classdef BrainCoordinates
     methods
         % Constructor
         function self = BrainCoordinates(V, varargin)
-            % dzyx, zxy0
+            % dzxy, zxy0
             p = inputParser;
             p.addParameter('dzxy',  1, @isnumeric);
             p.addParameter('zxy0',  0, @isnumeric);

@@ -15,14 +15,7 @@ endSamp = vectorEnd+vectorDir*padding;
 trajX = 0:spacing:(len+2*padding); % the spatial coordinates along the trajectory
 allSamp = startSamp+trajX'*vectorDir;
 
-% get labels from those points - convert to indices
-inds = atlas.brain_coor.zxy2iii(allSamp);
-av = atlas.vol_labels; 
-
-% clip ones that are out of range
-for d = 1:3; inds(:,d) = min(max(inds(:,d),1),size(av,d)); end
-
-lab = av(round(sub2ind(size(av), inds(:,1), inds(:,2), inds(:,3))));
+lab = labelsAlongVector(atlas, allSamp);
 
 % plot the areas
 im = imagesc(1, trajX, lab, 'Parent', gca);
@@ -36,7 +29,7 @@ dLab = find(diff([-1; double(lab)])~=0);
 dLab(end+1) = numel(lab);
 for u = 1:(numel(dLab)-1)
     uy(u) = mean(dLab(u:u+1));
-    uStr{u} = atlas.labels.acronym{lab(dLab(u))};
+    uStr{u} = atlas.labels.acronym{lab(dLab(u))+1};
 end
 
 [uy,ii] = sort(uy); 

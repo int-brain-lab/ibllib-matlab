@@ -7,7 +7,8 @@ fv = isosurface(double(self.vol_labels) , 0.5);
 iorigin = self.brain_coor.iorigin;
 iorigin = iorigin([2 1 3]); 
 fv.vertices = bsxfun( @minus, fv.vertices, iorigin);
-fv.vertices = fv.vertices.* self.brain_coor.res;
+res = self.brain_coor.res;
+fv.vertices = fv.vertices.* res([2 1 3]);
 
 if nargin <=1
     h.fig_volume = figure('Color','w'); h.ax = gca;
