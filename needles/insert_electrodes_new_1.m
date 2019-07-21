@@ -258,6 +258,8 @@ end
 
 %% coverage: distance to nearest probe
 
+q = e.coverage1(ba, [-7.5 2.5]*1e-3);
+
 %% coverage: list of areas missed
 
 %% plot: recording locations top down

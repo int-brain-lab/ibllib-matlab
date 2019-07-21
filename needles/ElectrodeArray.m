@@ -165,15 +165,47 @@ classdef ElectrodeArray < handle
             % find voxels with brain, in the left hemisphere
             v = atlas.vol_labels;
             v = v(:,1:round(size(v,2)/2),:); % assuming volume is symmetric on zero
+            apLims = atlas.brain_coor.z2i(apLims); 
+            v(:,:,(1:size(v,3))<apLims(1)) = 0; 
+            v(:,:,(1:size(v,3))>apLims(2)) = 0; 
+            
             [vx, vy, vz] = ind2sub(size(v), find(v>0)); 
             vx = atlas.brain_coor.i2x(vx);
             vy = atlas.brain_coor.i2x(vy);
-            vz = atlas.brain_coor.i2x(vz);
+            vz = atlas.brain_coor.i2x(vz);                        
             
-            % compute distances to nearest vectors
+            % get vectors
+            xy = obj.dvmlap_entry;
+            tips = obj.dvmlap_tip;
+            
+            recBottom = min(obj.site_coords(:,2)); recTop = max(obj.site_coords(:,2));
+            xyBottom = zeros(size(xy)); xyTop = zeros(size(xy));
+            for q = 1:size(xy,1)
+                vecDir = xy(q,:)-tips(q,:);
+                vecDir = vecDir./norm(vecDir);
+                xyBottom(q,:) = vecDir*recBottom+tips(q,:);
+                xyTop(q,:) = vecDir*recTop+tips(q,:);
+            end
+            
+            % compute distances to nearest vectors            
+            a = xyTop - xyBottom;
+            na = (sum(a.^2,2)).^(0.5);
+            for q = 1:numel(vx)                
+                b = [vx(q) vy(q) vz(q)] - xyBottom;
+                
+                cab = cross(a, b, 2);
+                
+                d = ((sum(cab.^2,2)).^(0.5))./na;
+                
+                minD(q) = min(d);
+            end
             
             % take average
+            c = mean(minD); 
         
+        end
+        
+ 
         
         function to_csv()
         end
