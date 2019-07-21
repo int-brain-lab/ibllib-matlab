@@ -1,5 +1,5 @@
-function [E, S] = insert_electrodes(atlas, lims, varargin)
-% [E, S] = insert_electrodes(vol_label, cs, S, lims)
+function E = insert_electrodes(atlas, lims, varargin)
+% E = insert_electrodes(atlas, lims, varargin)
 % V: Brain Atlas Volume, struct with fields phy and lab: for example
 %     phy: [241×315×478 single]
 %     lab: [241×315×478 single]
@@ -110,4 +110,6 @@ E.esel = logical(E.rec_length * 0 +1);
 %     fid = fopen(CSV_IMPLANTS,'w+'); fwrite(fid, csv_head); fclose(fid);
 %     dlmwrite('implantations.csv', T,'-append')
 % end
-
+%%
+E = ElectrodeArray(E.xyz_entry(:,[3 1 2]), E.xyz_(:, [3 1 2]),...
+    'coronal_index', E.Line, 'sagittal_index', E.Point, 'index', double(E.theta * 180/pi == 10));

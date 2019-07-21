@@ -17,8 +17,10 @@ classdef ElectrodeArray < handle
             % 2nd dim = y = along the shank
             % 3rd dim = z = out of plane of the shank (un-used for neuropixels)
             
-        coronal_index  % line number in a grid
-        sagittal_index  % point number in a grid
+        coronal_index  % line number in a grid, corresponds to a coronal slice
+        sagittal_index  % point number in a grid, corresponds to a sagittal slice
+        index % arbitrary identifier to group probes if necessary. Used to colour probes plots in Needles.
+        
     end
     
     methods
@@ -32,7 +34,11 @@ classdef ElectrodeArray < handle
             p = inputParser;
             addOptional(p,'probe_roll',  zeros(self.n, 1), @isnumeric);
             % by default we assume just 2 sites to have a recording length 3.5mm from the tip
-            addOptional(p,'site_coords', [0, 3.5*1e-3, 0 ; 0 0 0 ] , @isnumeric); 
+            addOptional(p,'site_coords', [0, 3.5*1e-3, 0 ; 0 0 0 ] , @isnumeric);
+            % line/points/index identifiers to reference probes easily if necessary
+            addOptional(p,'coronal_index', zeros(self.n, 1).*NaN, @isnumeric); % line number refers to a coronal slice
+            addOptional(p,'sagittal_index', zeros(self.n, 1).*NaN , @isnumeric); % point number refers to a sagittal slice            
+            addOptional(p,'index', zeros(self.n, 1).*NaN , @isnumeric); % arbitrary group ID, used for colouring in Needles for example
             parse(p, varargin{:});
             for fn = fieldnames(p.Results)', eval(['self.' fn{1} '= p.Results.' (fn{1}) ';']); end
         end
