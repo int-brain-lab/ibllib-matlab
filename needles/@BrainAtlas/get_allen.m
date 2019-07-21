@@ -5,6 +5,9 @@ function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_u
 % http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/
 
 BREGMA = [0, 570, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
+ZSCALE = 0.952; % multiplicative factor on DV dimension, determined from MRI->CCF transform by M. Faulkner
+YSCALE = 1.087; % multiplicative factor on AP dimension
+
 
 if ~exist('res_um', 'var'), res_um = 50; end
 file_label_csv = [atlas_path filesep 'structure_tree_safe_2017.csv'];
@@ -43,6 +46,13 @@ bc = BrainCoordinates(vol_labels, 'dzxy', res);
 
 zxy0 = -[bc.i2z(BREGMA(1)), bc.i2x(BREGMA(2)), bc.i2y(BREGMA(3))];
 bc = BrainCoordinates(vol_labels, 'dzxy', res, 'zxy0', zxy0);
+
+% apply scaling to the ap and dv axes
+bc.dz = bc.dz*ZSCALE;
+yy = bc.dy*YSCALE;
+origBregYidx = bc.y0/bc.dy;
+bc.dy = yy;
+bc.y0 = origBregYidx*yy;
 
 % make the colormap
 q = labels.table.color_hex_triplet;
