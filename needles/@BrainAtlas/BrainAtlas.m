@@ -34,6 +34,16 @@ classdef BrainAtlas
                 obj.surf_bottom(s,:) = accumarray(i2, i1, [obj.brain_coor.nx 1], @max, NaN);
             end
         end
+        
+        function dvStart = dvTopForAPslice(obj, apCoord)
+            % the dv position of the surface of the brain for some AP
+            % position
+            thisSliceIdx = round(obj.brain_coor.y2i(apCoord));
+            thisSlice = obj.vol_labels(:,:,thisSliceIdx);
+            q = max(thisSlice,[],2);
+            dvStartIdx = find(q>0,1);
+            dvStart = obj.brain_coor.i2z(dvStartIdx);
+        end
     end
     
     methods

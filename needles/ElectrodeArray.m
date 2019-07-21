@@ -37,6 +37,13 @@ classdef ElectrodeArray < handle
             for fn = fieldnames(p.Results)', eval(['self.' fn{1} '= p.Results.' (fn{1}) ';']); end
         end
         
+        function removeAll(obj)
+            obj.n = 0; 
+            obj.dvmlap_entry = []; 
+            obj.dvmlap_tip = [];
+            obj.probe_roll = [];
+        end
+        
         function obj = add_probe_by_start_angles(obj, startCoord, angles, depth, atlas)
             % angles are [yaw pitch roll] from the P->A axis. Roll doesn't
             % determine the vector but is stored. Depth is relative to
@@ -58,7 +65,8 @@ classdef ElectrodeArray < handle
             
             entryIdx = find(lab>0,1);
             lastIdx = find(lab>0,1,'last');
-            if ~isempty(entryIdx)
+            spanInBrain = sum(lab>0); 
+            if ~isempty(entryIdx) && (spanInBrain*spacing)>3.5e-3
                 entryZYX = trajThroughBrain(:,max(1,entryIdx-1))';
                 
                 depthToLast = norm(trajThroughBrain(:,lastIdx)'-entryZYX);
@@ -113,6 +121,59 @@ classdef ElectrodeArray < handle
             plotTrajectory(ax, atlas, vectorStart, vectorEnd);
             
         end
+        
+        function h = plot_probes_at_slice(obj, atlas, ax, apCoord)
+            these = obj.dvmlap_entry(:,3)==apCoord;
+            
+            xy = obj.dvmlap_entry(these,1:2);
+            tips = obj.dvmlap_tip(these,1:2);
+            
+            recBottom = min(obj.site_coords(:,2)); recTop = max(obj.site_coords(:,2));
+            xyBottom = zeros(size(xy)); xyTop = zeros(size(xy));
+            for q = 1:size(xy,1)
+                vecDir = xy(q,:)-tips(q,:);
+                vecDir = vecDir./norm(vecDir);
+                xyBottom(q,:) = vecDir*recBottom+tips(q,:);
+                xyTop(q,:) = vecDir*recTop+tips(q,:);
+            end
+            
+            sliceIdx = round(atlas.brain_coor.y2i(apCoord));
+                        
+            zs = atlas.brain_coor.zscale; xs = atlas.brain_coor.xscale;
+
+            %     imagesc(xs,zs,ba.vol_image(:,:,sliceIdx)); caxis([0 10000]); colormap gray;
+            imagesc(xs,zs,atlas.vol_labels(:,:,sliceIdx), 'Parent', ax); 
+            caxis([0 size(atlas.cmap,1)-1]); colormap(atlas.cmap);
+            
+            hold on;            
+            axis image;
+            h = [];
+            for idx = 1:size(xy,1)
+                %plot([xy(idx,2) tips(idx,2)], [xy(idx,1) tips(idx,1)], 'r', 'LineWidth', 2.0);
+                h(idx) = plot([xyBottom(idx,2) xyTop(idx,2)], [xyBottom(idx,1) xyTop(idx,1)], 'k');
+                hold on;
+            end
+            %xlabel('LR'); ylabel('DV');
+            axis off
+            set(gca, 'YDir', 'reverse');
+        end
+        
+        function c = coverage1(obj, atlas, apLims)
+            % Compute the distance between each voxel of the atlas and the
+            % nearest probe
+            
+            % find voxels with brain, in the left hemisphere
+            v = atlas.vol_labels;
+            v = v(:,1:round(size(v,2)/2),:); % assuming volume is symmetric on zero
+            [vx, vy, vz] = ind2sub(size(v), find(v>0)); 
+            vx = atlas.brain_coor.i2x(vx);
+            vy = atlas.brain_coor.i2x(vy);
+            vz = atlas.brain_coor.i2x(vz);
+            
+            % compute distances to nearest vectors
+            
+            % take average
+        
         
         function to_csv()
         end
