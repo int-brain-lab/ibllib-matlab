@@ -1,6 +1,9 @@
 % ba = BrainAtlas('/Users/nick/Dropbox/projects/ibl/data/allenAtlas', 'allen50');
 ba = BrainAtlas('/datadisk/BrainAtlas/ATLASES/Allen', 'allen50');
 
+ba = BrainAtlas('/datadisk/BrainAtlas/ATLASES/Allen', 'ibl50');
+
+
 h = ba.show();
 
 

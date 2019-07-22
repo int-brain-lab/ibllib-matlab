@@ -52,26 +52,56 @@ message = {'International Brain Laboratory', ...
            'Atlas from http://repo.mouseimaging.ca/repo/DSURQE_40micron_nifti/'}
 f = msgbox(message, ['Needles v' h.ver])
 
+function menu_file_ibl10_Callback(hobj, evt, h)
+load_atlas(h, 'ibl10')
 
-function menu_file_dsurqe_Callback(hObject, eventdata, h)
-load_atlas(h, 'dsurqe')
+function menu_file_ibl25_Callback(hobj, evt, h)
+load_atlas(h, 'ibl25')
+
+function menu_file_ibl50_Callback(hobj, evt, h)
+load_atlas(h, 'ibl50')
+
+function menu_file_ibl100_Callback(hobj, evt, h)
+load_atlas(h, 'ibl100')
+
+function menu_file_allen10_Callback(hobj, evt, h)
+load_atlas(h, 'allen10')
+
+function menu_file_allen25_Callback(hobj, evt, h)
+load_atlas(h, 'allen25')
 
 function menu_file_allen50_Callback(hobj, evt, h)
 load_atlas(h, 'allen50')
 
+function menu_file_allen100_Callback(hobj, evt, h)
+load_atlas(h, 'allen100')
+
+function menu_file_waxholm_Callback(hobj, evt, h)
+load_atlas(h, 'waxholm')
+
+function menu_file_dsurqe_Callback(hObject, eventdata, h)
+load_atlas(h, 'dsurqe')
+
 function load_atlas(h, atlas_label)
 cmap = 'bone';
-D.atlas = BrainAtlas(h.pref.(atlas_label).path, atlas_label);
-switch atlas_label
-    case 'dsurqe'
-        set(h.txt_title, 'String', 'Dorr et.al., 2008, High resolution three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J mice.')
-        lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]); 
-    case 'allen50'
+switch true
+    case startsWith(atlas_label, 'ibl')
+        set(h.txt_title, 'String', 'Stretched version of Allen Brain Institute CCF')
+        lims = struct('ap_lims', [-0.0084786 0.00313056], 'ml_lims', [-0.004 0.004]);
+        pref_field = 'allen';
+    case startsWith(atlas_label, 'allen')
         set(h.txt_title, 'String', 'Allen Brain Institute CCF')
-        lims = struct('ap_lims', [-0.005177 0.005503]-.002623, 'ml_lims', [-0.004 0.004]); 
-    case 'waxholm'
-        lims = struct('ap_lims', [-.009205 .004288], 'ml_lims', [-0.004 0.004]); 
+        lims = struct('ap_lims',[-0.0078 0.00288], 'ml_lims', [-0.004 0.004]);
+        pref_field = 'allen';
+    case strcmp(atlas_label, 'waxholm')
+        lims = struct('ap_lims', [-.009205 .004288], 'ml_lims', [-0.004 0.004]);
+        pref_field = 'waxholm';
+    case strcmp(atlas_label, 'dsurqe')
+        set(h.txt_title, 'String', 'Dorr et.al., 2008, High resolution three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J mice.')
+        lims = struct('ap_lims', [-0.0078 0.00288], 'ml_lims', [-0.004 0.004]);
+        pref_field = 'dsurqe';
 end
+D.atlas = BrainAtlas(h.pref.(pref_field).path, atlas_label);
 
 % make a direct orthogonal system with your right hand (thumb, index and middle finger),
 % point the middle finger towards center of Earth
@@ -340,4 +370,5 @@ end
 
 Update_Slices(hobj, [], ap_new)
 Update_txt_xyz(hobj, NaN,  ap_new, NaN)
+
 

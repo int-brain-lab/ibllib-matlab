@@ -18,6 +18,8 @@ classdef BrainAtlas
             %   atlas_path: full path containing files to build the atlas
             %   available atlases: allen50
             switch atlas_label
+                case 'ibl50'
+                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_ibl(atlas_path, 50);
                 case 'allen50'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 50);
                 case 'dsurqe'
@@ -51,7 +53,8 @@ classdef BrainAtlas
     end
     
     methods (Static)
-        [vlab vim, bc, labels, cmap] = get_allen(atlas_path, res_nm)
+        [vlab vim, bc, labels, cmap] = get_ibl(atlas_path, res_nm, varargin)
+        [vlab vim, bc, labels, cmap] = get_allen(atlas_path, res_nm, varargin)
         [vlab vim, bc, labels] = get_dsurqe(atlas_path, res_nm)
     end
     

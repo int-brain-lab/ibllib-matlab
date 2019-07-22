@@ -1,15 +1,19 @@
-function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_um)
+function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_um, varargin)
 
 %% All units SI
 % http://help.brain-map.org/display/mousebrain/API#API-DownloadImages
 % http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/
 
 BREGMA = [0, 570, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
-ZSCALE = 0.952; % multiplicative factor on DV dimension, determined from MRI->CCF transform by M. Faulkner
-YSCALE = 1.087; % multiplicative factor on AP dimension
 
+p = inputParser;
+p.addOptional('res_um', 50);
+p.addParameter('DV_SCALE', 1);
+p.addParameter('AP_SCALE', 1);
+p.parse(varargin{:});
+p.parse(varargin{:});
+for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
 
-if ~exist('res_um', 'var'), res_um = 50; end
 file_label_csv = [atlas_path filesep 'structure_tree_safe_2017.csv'];
 
 nrd_file_annotations =  [atlas_path filesep 'annotation_' num2str(res_um) '.nrrd'];
@@ -48,8 +52,8 @@ zxy0 = -[bc.i2z(BREGMA(1)), bc.i2x(BREGMA(2)), bc.i2y(BREGMA(3))];
 bc = BrainCoordinates(vol_labels, 'dzxy', res, 'zxy0', zxy0);
 
 % apply scaling to the ap and dv axes
-bc.dz = bc.dz*ZSCALE;
-yy = bc.dy*YSCALE;
+bc.dz = bc.dz*DV_SCALE;
+yy = bc.dy*AP_SCALE;
 origBregYidx = bc.y0/bc.dy;
 bc.dy = yy;
 bc.y0 = origBregYidx*yy;
@@ -61,5 +65,3 @@ c1 = cellfun(@(x)hex2dec(x(1:2)), q, 'uni', false);
 c2 = cellfun(@(x)hex2dec(x(3:4)), q, 'uni', false);
 c3 = cellfun(@(x)hex2dec(x(5:6)), q, 'uni', false);
 cmap = horzcat(vertcat(c1{:}),vertcat(c2{:}),vertcat(c3{:}))./255;
-
-
