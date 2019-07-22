@@ -94,7 +94,7 @@ h.pl_top_origin = plot(h.axes_top, 0,0, 'r+');
 h.pl_top_zone_lock = plot(h.axes_top, NaN, 0,'.','MarkerSize',5,'Color',color_from_index(6));
 h.pl_top_apline = plot(h.axes_top, [0 0], [bc.xlim], 'color', color_from_index(2));
 set(h.pl_top_apline, 'ButtonDownFcn', @pl_top_apline_ButtonDownFcn)
-h.pl_top_electrodes = plot(h.axes_top, D.E.xyz_entry(D.E.esel,2), D.E.xyz_entry(D.E.esel,1), '.', ...
+h.pl_top_electrodes = plot(h.axes_top, D.E.dvmlap_entry(:,3), D.E.dvmlap_entry(:,2), '.', ...
 'ButtonDownFcn', @pl_top_electrodes_ButtonDownFcn, 'MarkerSize', 10, 'Color','w');
 h.pl_top_current_elec = plot(h.axes_top, NaN, NaN, '*', 'color', 'm', 'MarkerSize',12);
 
@@ -150,16 +150,14 @@ bc = D.atlas.brain_coor;
 ie = find((abs(evt.Source.XData-evt.IntersectionPoint(1)) < 1e-9) & ...
 (abs(evt.Source.YData-evt.IntersectionPoint(2)) < 1e-9));
 % Find the electrode index from the plot to the data structure
-esel = find(D.E.esel);
-ie = esel(ie);
-ap_current =D.E.xyz0(ie(1),2);
+ap_current = D.E.dvmlap_entry(ie(1),3);
 Update_Slices(h.fig_main, [], ap_current);
 set(h.axes_top,'UserData', round(bc.y2i(ap_current(1))))
 Update_txt_electrodes(hobj, ie);
 set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
-    'xdata', D.E.xyz_entry(ie,1), 'ydata', D.E.xyz_entry(ie,3))
+    'xdata', D.E.dvmlap_entry(ie,2), 'ydata', D.E.dvmlap_entry(ie,1))
 set( h.pl_top_current_elec,'Visible', 'on',...
-    'xdata', D.E.xyz_entry(ie,2), 'ydata', D.E.xyz_entry(ie,1))
+    'xdata', D.E.dvmlap_entry(ie,3), 'ydata', D.E.dvmlap_entry(ie,2))
 
 
 function pl_zone_ButtonDownFcn(hobj, evt)
@@ -237,10 +235,10 @@ h = guidata(hobj);
 D = getappdata(h.fig_main, 'Data');
 set(h.pan_electrode, 'Visible', 'on');
 set(h.txt_electrode, 'Visible', 'on', 'String', { '', ...
-    ['Line: ' num2str(D.E.Line(ie(1)), '%04.0f')], ...
-    ['Point: ' num2str(D.E.Point(ie(1)), '%04.0f')], ...
-    ['AP: ' num2str(D.E.xyz_entry(ie(1),2)*1e3, '%6.3f (mm)')],...
-    ['ML: ' num2str(D.E.xyz_entry(ie(1),1)*1e3, '%6.3f (mm)')]});
+    ['Line: ' num2str(D.E.coronal_index(ie(1)), '%04.0f')], ...
+    ['Point: ' num2str(D.E.sagittal_index(ie(1)), '%04.0f')], ...
+    ['AP: ' num2str(D.E.dvmlap_entry(ie(1),3)*1e3, '%6.3f (mm)')],...
+    ['ML: ' num2str(D.E.dvmlap_entry(ie(1),2)*1e3, '%6.3f (mm)')]});
 %     ['Depths (shallow): ' num2str(D.E.length(ie(1)',1)*1e6, '%06.0f (um)')],...
 %     ['Depths (deep): ' num2str(D.E.length(ie(2)',1)*1e6, '%06.0f (um)')]},...
 
@@ -294,19 +292,18 @@ if ~isempty(labind)
     set([h.pl_phy_zone_lock h.pl_lab_zone_lock], 'xdata', bc.i2x(z), 'ydata', bc.i2z(x))
 end
 % Find the electrodes from the closest coronal plane
-[d, ie] = min(abs(ap(1) -  D.E.xyz0(:,2)));
-ie = D.E.xyz0(:,2)==D.E.xyz0(ie,2);
+[d, ie] = min(abs(ap(1) -  D.E.dvmlap_entry(:,3)));
+i1 = abs( D.E.dvmlap_entry(:,3) - D.E.dvmlap_entry(ie,3)) < .0003;
 % Plot Electrodes
 lineplot = @(xyz0,xyz1,n) flatten([xyz0(:,n) xyz1(:,n) xyz1(:,n).*NaN]');
 % plot 10 degres insertions, active shank and full track
 % i1 = D.E.esel & ie & abs(D.E.theta) == 10*pi/180;
-i1 = D.E.esel & ie;
 set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
-    'xdata', lineplot(D.E.xyz0(i1,:), D.E.xyz_(i1,:),1),...
-    'ydata', lineplot(D.E.xyz0(i1,:), D.E.xyz_(i1,:),3))
+    'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
+    'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
 set([h.pl_phy_electrodes_traj(1) h.pl_lab_electrodes_traj(1)],...
-    'xdata', lineplot(D.E.xyz_entry(i1,:), D.E.xyz_exit(i1,:),1),...
-    'ydata', lineplot(D.E.xyz_entry(i1,:), D.E.xyz_exit(i1,:),3))
+    'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
+    'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
 % plot 20 degres insertions, active shank and full track
 % i2 = D.E.esel & ie & abs(D.E.theta) == 20*pi/180;
 % set([h.pl_phy_electrodes(2) h.pl_lab_electrodes(2)],...
