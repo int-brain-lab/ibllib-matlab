@@ -211,12 +211,27 @@ classdef ElectrodeArray < handle
         
         end
         
- 
-        
-        function to_csv()
+        function to_struct(self)
+            s = struct('ap_in', self.dvmlap_entry(:,3),...
+                       'ml_in', self.dvmlap_entry(:,2),...
+                       'dv_in', self.dvmlap_entry(:,1),...
+                       'insertion_length', self.insertion_length,...
+                       'pitch', self.pitch,...
+                       'yaw', self.yaw,...
+                       'coronal_index', self.coronal_index,...
+                       'sagittal_index', self.sagittal_index,...
+                       'index', self.index);
         end
         
-        function from_csv()
+        function to_csv(self)
+        
+            
+        end
+        
+    end
+    
+    methods Static
+        function from_csv(self)
             
         end
         

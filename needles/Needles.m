@@ -44,44 +44,6 @@ guidata(hobj, h);
 varargout{1} = h.output;
 
 
-function menu_about_Callback(hobj, evt, h)
-h = guidata(hobj);
-message = {'International Brain Laboratory', ...
-           'Github: https://github.com/int-brain-lab/WGs',...
-           'MIT License', ...
-           'Atlas from http://repo.mouseimaging.ca/repo/DSURQE_40micron_nifti/'}
-f = msgbox(message, ['Needles v' h.ver])
-
-function menu_file_ibl10_Callback(hobj, evt, h)
-load_atlas(h, 'ibl10')
-
-function menu_file_ibl25_Callback(hobj, evt, h)
-load_atlas(h, 'ibl25')
-
-function menu_file_ibl50_Callback(hobj, evt, h)
-load_atlas(h, 'ibl50')
-
-function menu_file_ibl100_Callback(hobj, evt, h)
-load_atlas(h, 'ibl100')
-
-function menu_file_allen10_Callback(hobj, evt, h)
-load_atlas(h, 'allen10')
-
-function menu_file_allen25_Callback(hobj, evt, h)
-load_atlas(h, 'allen25')
-
-function menu_file_allen50_Callback(hobj, evt, h)
-load_atlas(h, 'allen50')
-
-function menu_file_allen100_Callback(hobj, evt, h)
-load_atlas(h, 'allen100')
-
-function menu_file_waxholm_Callback(hobj, evt, h)
-load_atlas(h, 'waxholm')
-
-function menu_file_dsurqe_Callback(hObject, eventdata, h)
-load_atlas(h, 'dsurqe')
-
 function load_atlas(h, atlas_label)
 cmap = 'bone';
 switch true
@@ -111,7 +73,7 @@ D.atlas = BrainAtlas(h.pref.(pref_field).path, atlas_label);
 % Y: AP (roll), 3d_dim +-
 % Z: DV (yaw), 1st_dim -+
 % VOL(Z, X, Y)
-[D.E] = insert_electrodes(D.atlas, lims);
+[D.E] = first_pass_map(D.atlas);
 
 bc = D.atlas.brain_coor;
 % Create all the objects depending on the top axes
@@ -371,4 +333,44 @@ end
 Update_Slices(hobj, [], ap_new)
 Update_txt_xyz(hobj, NaN,  ap_new, NaN)
 
+function menu_about_Callback(hobj, evt, h)
+h = guidata(hobj);
+message = {'International Brain Laboratory', ...
+           'Github: https://github.com/int-brain-lab/WGs',...
+           'MIT License', ...
+           'Atlas from http://repo.mouseimaging.ca/repo/DSURQE_40micron_nifti/'}
+f = msgbox(message, ['Needles v' h.ver])
 
+function menu_file_ibl10_Callback(hobj, evt, h)
+load_atlas(h, 'ibl10')
+
+function menu_file_ibl25_Callback(hobj, evt, h)
+load_atlas(h, 'ibl25')
+
+function menu_file_ibl50_Callback(hobj, evt, h)
+load_atlas(h, 'ibl50')
+
+function menu_file_ibl100_Callback(hobj, evt, h)
+load_atlas(h, 'ibl100')
+
+function menu_file_allen10_Callback(hobj, evt, h)
+load_atlas(h, 'allen10')
+
+function menu_file_allen25_Callback(hobj, evt, h)
+load_atlas(h, 'allen25')
+
+function menu_file_allen50_Callback(hobj, evt, h)
+load_atlas(h, 'allen50')
+
+function menu_file_allen100_Callback(hobj, evt, h)
+load_atlas(h, 'allen100')
+
+function menu_file_waxholm_Callback(hobj, evt, h)
+load_atlas(h, 'waxholm')
+
+function menu_file_dsurqe_Callback(hobj, evt, h)
+load_atlas(h, 'dsurqe')
+
+function menu_electrode_table_Callback(hobj, evt, h)
+function menu_electrode_load_Callback(hobj, evt, h)
+function menu_electrode_write_Callback(hobj, evt, h)
