@@ -81,7 +81,8 @@ classdef ElectrodeArray < handle
 
                 obj.dvmlap_entry(end+1,:) = entryZYX;
                 obj.dvmlap_tip(end+1,:) = tipZYX;
-
+                
+                [obj.coronal_index(end+1), obj.sagittal_index(end+1), obj.index(end+1)] = deal(NaN);
                 obj.n = obj.n+1; 
             end
             
@@ -128,8 +129,14 @@ classdef ElectrodeArray < handle
             
         end
         
-        function h = plot_probes_at_slice(obj, atlas, ax, apCoord)
+        function h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
+%             h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
+
+            if nargin <= 4, ie = []; end
+            
             these = obj.dvmlap_entry(:,3)==apCoord;
+            [~, ie] = intersect(find(these), ie);
+            
             
             xy = obj.dvmlap_entry(these,1:2);
             tips = obj.dvmlap_tip(these,1:2);
@@ -149,19 +156,21 @@ classdef ElectrodeArray < handle
 
             %     imagesc(xs,zs,ba.vol_image(:,:,sliceIdx)); caxis([0 10000]); colormap gray;
             imagesc(xs,zs,atlas.vol_labels(:,:,sliceIdx), 'Parent', ax); 
-            caxis([0 size(atlas.cmap,1)-1]); colormap(atlas.cmap);
+            caxis(ax, [0 size(atlas.cmap,1)-1]); colormap(get(ax, 'Parent'), atlas.cmap);
             
-            hold on;            
-            axis image;
+            set(ax, 'NextPlot', 'add');            
+            axis(ax, 'image');
             h = [];
             for idx = 1:size(xy,1)
                 %plot([xy(idx,2) tips(idx,2)], [xy(idx,1) tips(idx,1)], 'r', 'LineWidth', 2.0);
-                h(idx) = plot([xyBottom(idx,2) xyTop(idx,2)], [xyBottom(idx,1) xyTop(idx,1)], 'k');
-                hold on;
+                h(idx) = plot(ax, [xyBottom(idx,2) xyTop(idx,2)], [xyBottom(idx,1) xyTop(idx,1)], 'k');
+                if ie == idx
+                    set(h(idx), 'LineWidth', 2, 'Color', 'r')
+                end
             end
             %xlabel('LR'); ylabel('DV');
-            axis off
-            set(gca, 'YDir', 'reverse');
+            axis(ax, 'off')
+            set(ax, 'YDir', 'reverse');
         end
         
         function c = coverage1(obj, atlas, apLims)
@@ -212,6 +221,7 @@ classdef ElectrodeArray < handle
         end
         
         function to_struct(self)
+            % work in progress
             s = struct('ap_in', self.dvmlap_entry(:,3),...
                        'ml_in', self.dvmlap_entry(:,2),...
                        'dv_in', self.dvmlap_entry(:,1),...

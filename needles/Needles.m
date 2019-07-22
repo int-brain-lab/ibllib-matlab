@@ -150,6 +150,32 @@ set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,2), 'ydata', D.E.dvmlap_entry(ie,1))
 set( h.pl_top_current_elec,'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,3), 'ydata', D.E.dvmlap_entry(ie,2))
+% get(h.fig_main, 'SelectionType')
+
+try % FIXME test for other Atlases without cmap
+% this will have to move to a method of Electrode Map
+ie = ie(1);
+f = findobj('Name', 'Trajectory', 'type', 'figure')
+if isempty(f)
+    f = figure('Color', 'w', 'Position', [200, 100, 380, 900], 'name', 'Trajectory', 'menubar', 'none', 'toolbar', 'none');
+    h_.ax1 = subplot(5,1,1, 'parent', f)
+    h_.ax2 = subplot(5,1,[2:5], 'parent', f)
+    guidata(f, h_);
+else
+    h_ = guidata(f);
+end
+entry = D.E.dvmlap_entry(ie,:)*1e3;
+tip = D.E.dvmlap_tip(ie,:)*1e3;
+angle = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
+
+% slice
+D.E.plot_probes_at_slice(D.atlas, h_.ax1, ap_current, ie);
+title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(angle)));
+D.E.plot_brain_loc(ie, h_.ax2, D.atlas);
+
+end
+
+
 
 
 function pl_zone_ButtonDownFcn(hobj, evt)
