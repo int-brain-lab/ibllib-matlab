@@ -1,19 +1,21 @@
+
+%% load atlas
+
+ba = BrainAtlas('/datadisk/BrainAtlas/ATLASES/Allen', 'allen50');
+
+
 %% create an ElectrodeArray and insert some probes
 
-
+% neuropixels coordinates
 coords = zeros(384,3); 
 coords(:,1) = repmat([43; 11; 59; 27], 384/4, 1);
 coords(:,2) = reshape(repmat(20:20:3840, 2, 1), 384, 1)+200;
 coords = coords.*1e-6;
+
 e = ElectrodeArray([],[], 'site_coords', coords); 
 
 
-% e.add_probe_by_start_angles([0 0 0], [90 80], 4*1e-3, ba);
-%             e.add_probe_by_start_angles([0 0.5e-3 0], [90 80], 4*1e-3, ba);
-%             e.add_probe_by_start_angles([0 1e-3 0], [90 80], 4*1e-3, ba);
-%             e.add_probe_by_start_angles([0 1.5e-3 0], [90 80], 4*1e-3, ba);
-
-%% version 1.0: 10 and -10 degrees, like from before
+%% [DEPRECATED - use v5 below] version 1.0: 10 and -10 degrees, like from before
 
 angle = 110;
 for xx = -7.5:0.5:2.5
@@ -40,7 +42,7 @@ end
 
 fprintf('n penetrations = %d\n', e.n);
 
-%% version 2.0: shallower angles, to give more clearance
+%% [DEPRECATED - use v5 below]  version 2.0: shallower angles, to give more clearance
 
 tilt = 15;
 
@@ -71,7 +73,7 @@ end
 
 fprintf('n penetrations = %d (%d and %d)\n', e.n, n1, e.n-n1);
 
-%% version 2.1: only one is shallower
+%% [DEPRECATED - use v5 below]  version 2.1: only one is shallower
 % A problem with this is that paired bilateral sites would have to be deep
 % rather than superficial, i.e. they can't include cortex. This is another
 % reason to go for the midline-going ones being superficial. 
@@ -105,7 +107,7 @@ end
 
 fprintf('n penetrations = %d (%d and %d)\n', e.n, n1, e.n-n1);
 
-%% version 3.0: switch which ones are deep
+%% [DEPRECATED - use v5 below]  version 3.0: switch which ones are deep
 % - gets perpendicular to layers in visual cortex and doesn't miss parts of
 % SC
 % - this version has really beautiful coverage but has about twice as many
@@ -140,7 +142,7 @@ end
 
 fprintf('n penetrations = %d (%d and %d)\n', e.n, n1, e.n-n1);
 
-%% version 4: trying version 3 but with shallower angles, though I don't think it'll help
+%% [DEPRECATED - use v5 below]  version 4: trying version 3 but with shallower angles, though I don't think it'll help
 
 tilt = 15; 
 spacing = 0.5; % mm
