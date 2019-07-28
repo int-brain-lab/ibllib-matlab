@@ -240,7 +240,7 @@ classdef ElectrodeArray < handle
         
     end
     
-    methods Static
+    methods(Static)
         function from_csv(self)
             
         end
