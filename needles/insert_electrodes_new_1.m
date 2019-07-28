@@ -316,7 +316,7 @@ for a = 1:numel(uAP)
     ax = subtightplot(6,8,a, 0.01, 0.01, 0.01);
     h = e.plot_probes_at_slice(ba, ax, uAP(a));
     set(h, 'LineWidth', 2.0);
-    title(sprintf('%.1f', uAP(a)*1e3))
+    title(sprintf('%.2f', uAP(a)*1e3))
     drawnow;    
     
 end
@@ -367,6 +367,49 @@ for q = 1:np
     drawnow;
 end
 
+%% trajectories through the brain for all sites
+saveDir = '/Users/nick/Dropbox/projects/ibl/data/needles/mapSlices';
+f = figure; f.Color = 'w'; f.Position = [ 1354         -90        1239         702];
+
+allEntry = e.dvmlap_entry;
+ap = allEntry(:,3); 
+n = numel(ap); 
+[~,qOrder] = sort(ap); 
+
+np = 8; pidx = 1; fidx = 34;
+for qidx = n-9:n
+    q = qOrder(qidx);
+    entry = allEntry(q,:)*1e3;
+    tip = e.dvmlap_tip(q,:)*1e3;
+    angle = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
+    
+    % slice
+    ax = subplot(5,np,pidx); 
+    h = e.plot_probes_at_slice(ba, ax, allEntry(q,3));
+    inThisSlice = find(ap==allEntry(q,3)); hidx = find(inThisSlice==q); 
+    set(h(hidx), 'LineWidth', 2.0);
+    
+    title(sprintf('%.2fap, %.2fml\n%d deg', entry(3), entry(2), round(angle)));
+    
+    % labels
+    ax = subplot(5,np,([2 3 4 5]-1)*np+pidx);
+    e.plot_brain_loc(q, ax, ba);
+    drawnow;
+    pidx = pidx+1;
+    
+    if pidx==np+1 || qidx==n
+        pidx = 1;
+        
+        if ~isempty(saveDir)
+            print(f, fullfileOS(saveDir, sprintf('slices_%d', fidx)), '-dpng', '-r300');
+            fidx = fidx+1;
+            close(f);
+            f = figure; f.Color = 'w'; f.Position = [ 1354         -90        1239         702];
+        end
+    end
+    
+end
+
 %% coverage: distance to nearest probe
 
 q = e.coverage1(ba, [-7.5 2.5]*1e-3);
@@ -376,8 +419,9 @@ q = e.coverage1(ba, [-7.5 2.5]*1e-3);
 %% plot: recording locations top down
 
 % av = readNPY('/Users/nick/Documents/allenCCFdata/annotation_volume_10um_by_index.npy');
-mlCoords = (1:size(av, 3))*10+ba.brain_coor.x0*1e6; 
-apCoords = (1:size(av,1))*10*1.087-max(ba.brain_coor.yscale)*1e6;
+szAV = [1320 800 1140];
+mlCoords = (1:szAV(3))*10+ba.brain_coor.x0*1e6; 
+apCoords = (1:szAV(1))*10*1.087-max(ba.brain_coor.yscale)*1e6;
 h = plotTopDownOutlines([],av, apCoords, mlCoords);
 set(h, 'LineWidth', 1.0, 'Color', [0.5 0.5 0.5])
 %
@@ -387,3 +431,30 @@ set(gcf, 'Color', 'w'); axis off;
 
 %% plot: in 3D
 
+rec_span = [0.2e-3 4.04e-3];
+
+f = figure; f.Color = 'w';
+szAV = [1320 800 1140];
+mlCoords = (1:szAV(3))*10+ba.brain_coor.x0*1e6; 
+apCoords = (1:szAV(1))*10*1.087-max(ba.brain_coor.yscale)*1e6;
+dvCoords = (1:szAV(2))*10*0.952+ba.brain_coor.z0*1e6; 
+plotBrainGridIBL(apCoords, mlCoords, dvCoords); 
+
+hold on; 
+
+entry = e.dvmlap_entry; 
+tip = e.dvmlap_tip;
+
+for q = 1:size(entry,1)
+    vec = entry(q,:)-tip(q,:);
+    vec = vec./norm(vec); 
+    
+    bottom = tip(q,:)+vec*rec_span(1); 
+    top = tip(q,:)+vec*rec_span(2);    
+    
+    bottom = bottom*1e6; % to µm
+    top = top*1e6; 
+    
+    plot3(-[bottom(3) top(3)], [bottom(2) top(2)], [bottom(1) top(1)], 'b');
+    
+end
