@@ -145,7 +145,10 @@ N = (2*e.n + 4) / (1-2/nPerMouse/3);
 M = N/nPerMouse; 
 
 fprintf(1, 'total N = %d, M = %d (at %d pens per mouse)\n', round(N), round(M), nPerMouse);
+e.index
+e.sagittal_index = e.sagittal_index * 12 + 5000;
+e.coronal_index = e.coronal_index * 12 + 2000;
 
 % export to csv
-% [p, f] = fileparts(which(mfilename));
-% e.to_csv([p, filesep, f, '.csv'])
+[p, f] = fileparts(which(mfilename));
+e.to_csv([p, filesep, f, '.csv'])
