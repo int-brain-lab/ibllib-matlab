@@ -48,9 +48,12 @@ classdef ElectrodeArray < handle
             obj.dvmlap_entry = []; 
             obj.dvmlap_tip = [];
             obj.probe_roll = [];
+            obj.coronal_index = [];
+            obj.sagittal_index = [];
+            obj.index = [];
         end
         
-        function obj = add_probe_by_start_angles(obj, startCoord, angles, depth, atlas)
+        function obj = add_probe_by_start_angles(obj, startCoord, angles, depth, atlas, corIdx, sagIdx)
             % angles are [yaw pitch roll] from the P->A axis. Roll doesn't
             % determine the vector but is stored. Depth is relative to
             % surface of the brain. At atlas is required to find the
@@ -82,7 +85,9 @@ classdef ElectrodeArray < handle
                 obj.dvmlap_entry(end+1,:) = entryZYX;
                 obj.dvmlap_tip(end+1,:) = tipZYX;
                 
-                [obj.coronal_index(end+1), obj.sagittal_index(end+1), obj.index(end+1)] = deal(NaN);
+                obj.coronal_index(end+1) = corIdx;
+                obj.sagittal_index(end+1) = sagIdx;
+                obj.index(end+1) = double(angles(2)>90);
                 obj.n = obj.n+1; 
             end
             

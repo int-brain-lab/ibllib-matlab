@@ -215,8 +215,13 @@ exclSites = [...
     -7.5 minLR+spacing*1; ...
     ];
 
-for xx = -7.5:spacing:2.5
-    for yy = [-1.0 -0.5 minLR:spacing:4]
+xPos = -7.5:spacing:2.5;
+yPos = [-1.0 -0.5 minLR:spacing:4];
+for xidx = 1:numel(xPos)
+    xx = xPos(xidx); 
+    for yidx = 1:numel(yPos)
+        yy = yPos(yidx);
+
         if useExclusions && ismember([xx yy], exclSites, 'rows')
             continue; 
         end
@@ -236,7 +241,7 @@ for xx = -7.5:spacing:2.5
         end
         e.add_probe_by_start_angles(...
             [dvTopForAPslice(ba, xx*1e-3) -useYY*1e-3 (xx+apOffset)*1e-3], ...
-            [90 useAngle], dep, ba);
+            [90 useAngle], dep, ba, xidx-16, -(yidx-2));
     end
 end
 n1 = e.n;
@@ -275,9 +280,12 @@ exclSites = [...
     -5 minLR+spacing*6; ...    
     -5.5 minLR+spacing*6; ...    
     ];
-
-for xx = -7.5:spacing:3    
-    for yy = minLR:spacing:5.0 
+xPos = -7.5:spacing:3;
+yPos = minLR:spacing:5.0;
+for xidx = 1:numel(xPos)
+    xx = xPos(xidx); 
+    for yidx = 1:numel(yPos)
+        yy = yPos(yidx);
 
         if useExclusions && ismember([xx yy], exclSites, 'rows')
             continue; 
@@ -285,7 +293,7 @@ for xx = -7.5:spacing:3
         
         e.add_probe_by_start_angles(...
             [dvTopForAPslice(ba, xx*1e-3) -yy*1e-3 xx*1e-3], ...
-            [90 angle], dep, ba);
+            [90 angle], dep, ba, xidx-16, -yidx);
         
 %         if yy==(minLR+spacing) || yy==(minLR+spacing*2) % for second and third, also go deep
 %             e.add_probe_by_start_angles(...
