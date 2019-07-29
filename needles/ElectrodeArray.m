@@ -24,6 +24,7 @@ classdef ElectrodeArray < handle
     end
     
     methods
+        %% Constructor and adding probes methods
         function self = ElectrodeArray(dvmlap_entry, dvmlap_tip, varargin)
             % ea = ElectrodeArray(dvmlap_entry, dvmlap_tip, 'probe_roll', pr, 'site_coords', sxyz)
             % parse input arguments
@@ -63,8 +64,6 @@ classdef ElectrodeArray < handle
             % not enabled
             
             % Z X Y is DV LR AP
-            
-            
             a = sind(angles(2)); b = cosd(angles(2));
             vec = [a b 0];
             
@@ -93,40 +92,39 @@ classdef ElectrodeArray < handle
             
         end
         
-        
+        %% Geometry and computation methods
         function dvmlap = dvmlap_exit(obj) % out of the brain
             
         end
-        
-        function p = pitch(obj) % rotation around L-R axis. Zero straight down, right is positive
-            p = zeros(size(obj.index)); 
-            
-            for q = 1:numel(obj.index)
-                entry = obj.dvmlap_entry(q,:);
-                tip = obj.dvmlap_tip(q,:);
-                p(q) = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
-            end
+                
+        function [yaw, pitch, r] = cart2sph(obj, ind)
+            % from dvmlap_entry and dvmlap_tip, returns az, el, r
+            if nargin < 2, ind = 1:obj.n; end
+            d =  obj.dvmlap_tip(ind,:) -  obj.dvmlap_entry(ind,:);
+            [yaw, pitch, r] = cart2sph(d(:,3), d(:,1), d(:,2));
+            pitch = pitch .* 180 / pi;
+            yaw = yaw .* 180 / pi;
         end
         
-        function y = yaw(obj) % rotation around D-V axis. Zero is anterior; positive is CCW (i.e. left)
-            y = (obj.index-0.5)*2*90; 
+        function y = yaw(obj, ind) % rotation around D-V axis. Zero is anterior; positive is CCW (i.e. left). Azimuth angle
+            if nargin < 2, ind = 1:obj.n; end
+            y = cart2sph(obj, ind);
         end
         
-        function r = recording_length(obj) % length of the part of the probe with active sites within the brain
-            
+        function p = pitch(obj, ind) % rotation around L-R axis. Zero straight down, right is positive. Elevation angle
+            if nargin < 2, ind = 1:obj.n; end
+            [~, p] = cart2sph(obj, ind);
         end
         
-        function d = insertion_length(obj) % distance between the tip of the probe and the insertion point
-            d = zeros(size(obj.index)); 
-            
-            for q = 1:numel(obj.index)
-                entry = obj.dvmlap_entry(q,:);
-                tip = obj.dvmlap_tip(q,:);
-                vec = tip-entry;
-                d(q) = norm(vec);
-            end
+        function r = recording_length(obj, ind) % length of the part of the probe with active sites within the brain
         end
         
+        function r = insertion_length(obj, ind) % distance between the tip of the probe and the insertion point
+            if nargin < 2, ind = 1:obj.n; end
+            [~, ~, r] = cart2sph(obj, ind);
+        end
+        
+        %% Export / Display and Plotting methods
         function plot_brain_loc(obj, idx, ax, atlas) 
             % idx is the electrode for which the plot should be made
             % ax is the axis into which to plot
