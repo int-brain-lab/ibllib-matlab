@@ -21,7 +21,9 @@ end
 function Needles_OpeningFcn(hobj, evt, h, varargin)
 h.output = hobj;
 h.ver = '1.0.0';
+setappdata(0, 'Needles', h.fig_main)
 guidata(hobj, h);
+set(h.menu_electrode, 'Enable', false)
 
 
 function varargout = Needles_OutputFcn(hobj, evt, h) 
@@ -75,6 +77,8 @@ D.atlas = BrainAtlas(h.pref.(pref_field).path, atlas_label);
 % VOL(Z, X, Y)
 [D.E] = first_pass_map(D.atlas);
 
+[h.fig_table_elec, h.table_elec] = D.E.show_table;
+set(h.table_elec, 'CellSelectionCallback', @table_e_cellSelection)
 bc = D.atlas.brain_coor;
 % Create all the objects depending on the top axes
 h.im_top = imagesc(bc.yscale, bc.xscale, D.atlas.surf_top', 'Parent', h.axes_top);
@@ -135,12 +139,16 @@ D.E = E;
 set(h.pl_top_electrodes, 'xdata', D.E.xyz_entry(D.E.esel,2), 'ydata', D.E.xyz_entry(D.E.esel,1));
 setappdata(h.fig_main, 'Data', D)
 
-function pl_top_electrodes_ButtonDownFcn(hobj, evt)
+function pl_top_electrodes_ButtonDownFcn(hobj, evt, ie)
 h = guidata(hobj);
 D = getappdata(h.fig_main, 'Data');
 bc = D.atlas.brain_coor;
-ie = find((abs(evt.Source.XData-evt.IntersectionPoint(1)) < 1e-9) & ...
-(abs(evt.Source.YData-evt.IntersectionPoint(2)) < 1e-9));
+% if the callback comes from the plot get the index. If it comes from the
+% table, we already have the index provided
+if nargin <=2
+    ie = find((abs(evt.Source.XData-evt.IntersectionPoint(1)) < 1e-9) & ...
+        (abs(evt.Source.YData-evt.IntersectionPoint(2)) < 1e-9));
+end
 % Find the electrode index from the plot to the data structure
 ap_current = D.E.dvmlap_entry(ie(1),3);
 Update_Slices(h.fig_main, [], ap_current);
@@ -150,16 +158,24 @@ set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,2), 'ydata', D.E.dvmlap_entry(ie,1))
 set( h.pl_top_current_elec,'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,3), 'ydata', D.E.dvmlap_entry(ie,2))
+drawnow
 % get(h.fig_main, 'SelectionType')
+if false && ishandle(h.fig_table_elec)
+    get(h.table_elec)
+    jUIScrollPane = findjobj(h.table_elec);
+    jUITable = jUIScrollPane.getViewport.getView;
+    jUITable.changeSelection(ie, 0, false, false);
+end
+
 
 try % FIXME test for other Atlases without cmap
 % this will have to move to a method of Electrode Map
 ie = ie(1);
-f = findobj('Name', 'Trajectory', 'type', 'figure')
+f = findobj('Name', 'Trajectory', 'type', 'figure');
 if isempty(f)
     f = figure('Color', 'w', 'Position', [200, 100, 380, 900], 'name', 'Trajectory', 'menubar', 'none', 'toolbar', 'none');
-    h_.ax1 = subplot(5,1,1, 'parent', f)
-    h_.ax2 = subplot(5,1,[2:5], 'parent', f)
+    h_.ax1 = subplot(5,1,1, 'parent', f);
+    h_.ax2 = subplot(5,1,[2:5], 'parent', f);
     guidata(f, h_);
 else
     h_ = guidata(f);
@@ -172,10 +188,12 @@ angle = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
 D.E.plot_probes_at_slice(D.atlas, h_.ax1, ap_current, ie);
 title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(angle)));
 D.E.plot_brain_loc(ie, h_.ax2, D.atlas);
-
 end
 
-
+function table_e_cellSelection(hobj, evt)
+set(hobj, 'UserData', evt)
+fig = getappdata(0, 'Needles');
+pl_top_electrodes_ButtonDownFcn(fig, evt, evt.Indices(1))
 
 
 function pl_zone_ButtonDownFcn(hobj, evt)

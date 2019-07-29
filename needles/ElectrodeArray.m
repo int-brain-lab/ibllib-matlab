@@ -1,5 +1,3 @@
-
-
 classdef ElectrodeArray < handle
     
     properties
@@ -125,6 +123,15 @@ classdef ElectrodeArray < handle
         end
         
         %% Export / Display and Plotting methods
+        function [fig_elec, tab_elec]= show_table(obj)
+            s = obj.to_struct;
+            fig_elec = figure('color', 'w', 'toolbar', 'none', 'menubar', 'none', 'numbertitle',...
+                'off', 'name', 'Electrode List');
+            tab_elec = uitable(fig_elec, 'Units', 'normalized', 'Position', [0 0 1 1]);
+            tab_elec.Data = table2array(struct2table(s));
+            tab_elec.ColumnName = fields(s);
+        end
+        
         function plot_brain_loc(obj, idx, ax, atlas) 
             % idx is the electrode for which the plot should be made
             % ax is the axis into which to plot
@@ -249,17 +256,11 @@ classdef ElectrodeArray < handle
                        'yaw', self.yaw);
         end
         
-        function to_csv(self)
-            writetable(struct2table(self.to_struct),'map.csv');            
+        function to_csv(self, output_file)
+            if nargin < 2, output_file = [pwd filesep 'electrode_array.csv']; end
+            writetable(struct2table(self.to_struct), output_file);
         end
         
     end
-    
-    methods(Static)
-        function from_csv(self)
-            
-        end
-        
-            
-    end
+
 end
