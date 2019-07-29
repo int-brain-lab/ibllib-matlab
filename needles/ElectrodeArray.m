@@ -85,9 +85,9 @@ classdef ElectrodeArray < handle
                 obj.dvmlap_entry(end+1,:) = entryZYX;
                 obj.dvmlap_tip(end+1,:) = tipZYX;
                 
-                obj.coronal_index(end+1) = corIdx;
-                obj.sagittal_index(end+1) = sagIdx;
-                obj.index(end+1) = double(angles(2)>90);
+                obj.coronal_index(end+1,:) = corIdx;
+                obj.sagittal_index(end+1,:) = sagIdx;
+                obj.index(end+1,:) = double(angles(2)>90);
                 obj.n = obj.n+1; 
             end
             
@@ -98,12 +98,18 @@ classdef ElectrodeArray < handle
             
         end
         
-        function p = pitch(obj) % rotation around L-R axis. Zero horizontal; downwards is positive
+        function p = pitch(obj) % rotation around L-R axis. Zero straight down, right is positive
+            p = zeros(size(obj.index)); 
             
+            for q = 1:numel(obj.index)
+                entry = obj.dvmlap_entry(q,:);
+                tip = obj.dvmlap_tip(q,:);
+                p(q) = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
+            end
         end
         
         function y = yaw(obj) % rotation around D-V axis. Zero is anterior; positive is CCW (i.e. left)
-        
+            y = (obj.index-0.5)*2*90; 
         end
         
         function r = recording_length(obj) % length of the part of the probe with active sites within the brain
@@ -111,7 +117,14 @@ classdef ElectrodeArray < handle
         end
         
         function d = insertion_length(obj) % distance between the tip of the probe and the insertion point
+            d = zeros(size(obj.index)); 
             
+            for q = 1:numel(obj.index)
+                entry = obj.dvmlap_entry(q,:);
+                tip = obj.dvmlap_tip(q,:);
+                vec = tip-entry;
+                d(q) = norm(vec);
+            end
         end
         
         function plot_brain_loc(obj, idx, ax, atlas) 
@@ -225,22 +238,21 @@ classdef ElectrodeArray < handle
         
         end
         
-        function to_struct(self)
+        function s = to_struct(self)
             % work in progress
-            s = struct('ap_in', self.dvmlap_entry(:,3),...
-                       'ml_in', self.dvmlap_entry(:,2),...
-                       'dv_in', self.dvmlap_entry(:,1),...
-                       'insertion_length', self.insertion_length,...
-                       'pitch', self.pitch,...
-                       'yaw', self.yaw,...
-                       'coronal_index', self.coronal_index,...
+            s = struct('coronal_index', self.coronal_index,...
                        'sagittal_index', self.sagittal_index,...
-                       'index', self.index);
+                       'index', self.index,...
+                       'ap_in', round(self.dvmlap_entry(:,3)*1e5)/1e2,... % units mm, this rounding gets 2 decimal places in the output
+                       'ml_in', round(self.dvmlap_entry(:,2)*1e5)/1e2,...
+                       'dv_in', round(self.dvmlap_entry(:,1)*1e5)/1e2,...
+                       'insertion_length', round(self.insertion_length*1e5)/1e2,...
+                       'pitch', self.pitch,...
+                       'yaw', self.yaw);
         end
         
         function to_csv(self)
-        
-            
+            writetable(struct2table(self.to_struct),'map.csv');            
         end
         
     end
