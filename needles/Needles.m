@@ -23,7 +23,7 @@ h.output = hobj;
 h.ver = '1.0.0';
 setappdata(0, 'Needles', h.fig_main)
 guidata(hobj, h);
-set(h.menu_electrode, 'Enable', false)
+set(h.menu_electrode, 'Enable', 'off')
 
 
 function varargout = Needles_OutputFcn(hobj, evt, h) 
@@ -82,7 +82,7 @@ set(h.table_elec, 'CellSelectionCallback', @table_e_cellSelection)
 bc = D.atlas.brain_coor;
 % Create all the objects depending on the top axes
 h.im_top = imagesc(bc.yscale, bc.xscale, D.atlas.surf_top', 'Parent', h.axes_top);
-set(h.axes_top, 'ydir', 'normal','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+set(h.axes_top, 'ydir', 'reverse','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
 set(h.axes_top,'UserData', round(bc.y2i(0))) % WIndow motion callback
 xlabel(h.axes_top, 'AP'), ylabel(h.axes_top, 'ML')
 colormap(h.axes_top, cmap);
