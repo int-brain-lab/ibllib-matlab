@@ -8,7 +8,8 @@ coords(:,2) = reshape(repmat(20:20:3840, 2, 1), 384, 1)+200;
 coords = coords.*1e-6;
 e = ElectrodeArray([],[], 'site_coords', coords); 
 
-%% version 5: a version of superficial-midline-going but trying to even sites
+%% version 6: switching cerebellum/medulla to right hemi
+e.removeAll();
 
 useExclusions = true;
 
@@ -17,8 +18,8 @@ tilt2 = 15;
 spacing = 0.5; % mm
 
 angle = 90+tilt1; dep = 14e-3; minLR = 0.8;
-apOffset = spacing/2;
-% apOffset = 0;
+apOffset = spacing/2; nspx = 6; nspy = 8;
+% apOffset = 0; nspx = 4; nspy = 6;
 
 exclSites = [...
     2.5 -1; ...
@@ -46,7 +47,7 @@ exclSites = [...
     -7.5 minLR+spacing*1; ...
     ];
 
-xPos = -7.5:spacing:2.5;
+xPos = -5.5:spacing:2.5;
 yPos = [-1.0 -0.5 minLR:spacing:4];
 for xidx = 1:numel(xPos)
     xx = xPos(xidx); 
@@ -57,15 +58,9 @@ for xidx = 1:numel(xPos)
             continue; 
         end
         
-        if yy<0 
-            if xx<=-5
-                useAngle = angle; 
-                useYY = yy+minLR; 
-            else
-                useAngle = 90+17; 
-                useYY = yy;
-            end
-
+        if yy<0
+            useAngle = 90+17;
+            useYY = yy;
         else
             useAngle = angle;
             useYY = yy; 
@@ -75,6 +70,29 @@ for xidx = 1:numel(xPos)
             [90 useAngle], dep, ba, xidx-16, -(yidx-2));
     end
 end
+
+exclSites = [0 0];
+
+xPos = -7.5:spacing:-5.6;
+yPos = [minLR:spacing:4];
+for xidx = 1:numel(xPos)
+    xx = xPos(xidx); 
+    for yidx = 1:numel(yPos)
+        yy = yPos(yidx);
+
+        if useExclusions && ismember([xx yy], exclSites, 'rows')
+            continue; 
+        end
+                
+        useAngle = angle;
+        useYY = yy;
+        
+        e.add_probe_by_start_angles(...
+            [dvTopForAPslice(ba, xx*1e-3) useYY*1e-3 (xx+apOffset)*1e-3], ...
+            [90 useAngle], dep, ba, xidx-16, -(yidx-2));
+    end
+end
+
 n1 = e.n;
 
 
@@ -111,7 +129,7 @@ exclSites = [...
     -5 minLR+spacing*6; ...    
     -5.5 minLR+spacing*6; ...    
     ];
-xPos = -7.5:spacing:3;
+xPos = -5.5:spacing:3;
 yPos = minLR:spacing:5.0;
 for xidx = 1:numel(xPos)
     xx = xPos(xidx); 
@@ -124,13 +142,25 @@ for xidx = 1:numel(xPos)
         
         e.add_probe_by_start_angles(...
             [dvTopForAPslice(ba, xx*1e-3) -yy*1e-3 xx*1e-3], ...
-            [90 angle], dep, ba, xidx-16, -yidx);
+            [90 angle], dep, ba, xidx-16, -yidx);        
+    end
+end
+
+exclSites = [0 0];
+xPos = -7.5:spacing:-5.6;
+yPos = 0.3:spacing:5.0;
+for xidx = 1:numel(xPos)
+    xx = xPos(xidx); 
+    for yidx = 1:numel(yPos)
+        yy = yPos(yidx);
+
+        if useExclusions && ismember([xx yy], exclSites, 'rows')
+            continue; 
+        end
         
-%         if yy==(minLR+spacing) || yy==(minLR+spacing*2) % for second and third, also go deep
-%             e.add_probe_by_start_angles(...
-%             [dvTopForAPslice(ba, xx*1e-3) -yy*1e-3 xx*1e-3], ...
-%             [90 angle], 14e-3, ba);
-%         end
+        e.add_probe_by_start_angles(...
+            [dvTopForAPslice(ba, xx*1e-3) yy*1e-3 xx*1e-3], ...
+            [90 angle], dep, ba, xidx-16, -yidx);        
     end
 end
 
@@ -145,7 +175,7 @@ N = (2*e.n + 4) / (1-2/nPerMouse/3);
 M = N/nPerMouse; 
 
 fprintf(1, 'total N = %d, M = %d (at %d pens per mouse)\n', round(N), round(M), nPerMouse);
-e.index
+e.index;
 e.sagittal_index = e.sagittal_index * 12 + 5000;
 e.coronal_index = e.coronal_index * 12 + 2000;
 
