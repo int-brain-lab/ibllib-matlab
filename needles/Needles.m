@@ -97,7 +97,7 @@ h.pl_top_current_elec = plot(h.axes_top, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 
 % Create all the objects depending on the contrast axes
 h.im_phy = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_image(:,:,round(bc.y2i(0))), 'Parent', h.axes_phy);
-set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'reverse')
 h.pl_phy_origin = plot(h.axes_phy, 0,0, 'r+');
 h.pl_phy_xr = plot(h.axes_phy, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_phy_zone = plot(h.axes_phy, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
@@ -111,7 +111,7 @@ xlabel(h.axes_phy, 'ML'), ylabel(h.axes_phy, 'DV')
 colormap(h.axes_phy, cmap)
 % Create all the objects depending on the label axes
 h.im_lab = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
-set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'reverse')
 h.pl_lab_origin = plot(h.axes_label, 0,0, 'r+');
 h.pl_lab_xr = plot(h.axes_label, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_lab_zone = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
