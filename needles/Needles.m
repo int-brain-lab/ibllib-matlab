@@ -171,11 +171,12 @@ end
 try % FIXME test for other Atlases without cmap
 % this will have to move to a method of Electrode Map
 ie = ie(1);
-f = findobj('Name', 'Trajectory', 'type', 'figure');
+f = findobj('Name', 'Trajectory', 'type', 'figure', 'tag', 'fig_trajectory');
 if isempty(f)
-    f = figure('Color', 'w', 'Position', [200, 100, 380, 900], 'name', 'Trajectory', 'menubar', 'none', 'toolbar', 'none');
-    h_.ax1 = subplot(5,1,1, 'parent', f);
-    h_.ax2 = subplot(5,1,[2:5], 'parent', f);
+    f = figure('Color', 'w', 'Position', [200, 100, 380, 900], 'name', 'Trajectory',...
+        'menubar', 'none', 'toolbar', 'none', 'numbertitle', 'off', 'tag', 'fig_trajectory');
+    h_.ax1 = subplot(5, 1, 1, 'parent', f);
+    h_.ax2 = subplot(5, 1, [2 : 5], 'parent', f);
     guidata(f, h_);
 else
     h_ = guidata(f);
