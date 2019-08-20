@@ -40,13 +40,14 @@ h.pref = io.read.json(pfile);
 h.fcn.Update_Slices = @Update_Slices;
 h.fcn.Update_txt_electrodes = @Update_txt_electrodes;
 h.fcn.Update_Electrodes = @electrodes_update;
-h.fcn.Load_Atlas =  @menu_file_loadatlas_Callback;
+h.fcn.Load_Atlas =  @load_atlas;
 % wrap-up and save in handles
 guidata(hobj, h);
 varargout{1} = h.output;
 
 
 function load_atlas(h, atlas_label)
+% possible labels: 'allen50', 'ibl50', 'dsurqe', 'waxholm'
 cmap = 'bone';
 switch true
     case startsWith(atlas_label, 'ibl')
@@ -82,7 +83,7 @@ set(h.table_elec, 'CellSelectionCallback', @table_e_cellSelection)
 bc = D.atlas.brain_coor;
 % Create all the objects depending on the top axes
 h.im_top = imagesc(bc.yscale, bc.xscale, D.atlas.surf_top', 'Parent', h.axes_top);
-set(h.axes_top, 'ydir', 'reverse','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+set(h.axes_top, 'ydir', 'normal','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
 set(h.axes_top,'UserData', round(bc.y2i(0))) % WIndow motion callback
 xlabel(h.axes_top, 'AP'), ylabel(h.axes_top, 'ML')
 colormap(h.axes_top, cmap);
@@ -159,7 +160,6 @@ set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
 set( h.pl_top_current_elec,'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,3), 'ydata', D.E.dvmlap_entry(ie,2))
 drawnow
-% get(h.fig_main, 'SelectionType')
 if false && ishandle(h.fig_table_elec)
     get(h.table_elec)
     jUIScrollPane = findjobj(h.table_elec);
