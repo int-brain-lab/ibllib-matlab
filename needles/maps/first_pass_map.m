@@ -175,9 +175,16 @@ N = (2*e.n + 4) / (1-2/nPerMouse/3);
 M = N/nPerMouse; 
 
 fprintf(1, 'total N = %d, M = %d (at %d pens per mouse)\n', round(N), round(M), nPerMouse);
-e.index;
-e.sagittal_index = e.sagittal_index * 12 + 5000;
-e.coronal_index = e.coronal_index * 12 + 2000;
+
+% recompute unique indices
+e.sagittal_index = round((e.dvmlap_entry(:,2) ./ ba.brain_coor.dx) * 2 + 5000);
+e.coronal_index = round((e.dvmlap_entry(:,3) ./ ba.brain_coor.dy) * 2 + 2000);
+% if this fails, use index above
+assert(length(unique([e.sagittal_index, e.coronal_index], 'rows')) == e.n)
+% move everything to left side
+e.dvmlap_entry(:,2) = - e.dvmlap_entry(:,2);
+e.dvmlap_tip(:,2) = - e.dvmlap_tip(:,2);
+
 
 % export to csv
 [p, f] = fileparts(which(mfilename));
