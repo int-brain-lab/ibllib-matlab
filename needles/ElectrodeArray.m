@@ -21,6 +21,17 @@ classdef ElectrodeArray < handle
         
     end
     
+    methods (Access = private)
+        function dvmlap = dvmlap_alongprobe(E, dx)
+            % computes the dv ml ap coordinates along the probe from tip.
+            % maxes out at exit point
+            dtip = E.dvmlap_entry - E.dvmlap_tip;
+            [t, p, r] = cart2sph(dtip(:,1), dtip(:,2), dtip(:,3));
+            [dv, ml, ap] = sph2cart(t, p, min(dx, r));
+            dvmlap = [dv ml ap] + E.dvmlap_tip;
+        end
+    end
+    
     methods
         %% Constructor and adding probes methods
         function self = ElectrodeArray(dvmlap_entry, dvmlap_tip, varargin)
@@ -62,6 +73,7 @@ classdef ElectrodeArray < handle
             % not enabled
             
             % Z X Y is DV LR AP
+            ELEC_LEN = 3.5e-3
             a = sind(angles(2)); b = cosd(angles(2));
             vec = [a b 0];
             
@@ -72,7 +84,7 @@ classdef ElectrodeArray < handle
             entryIdx = find(lab>0,1);
             lastIdx = find(lab>0,1,'last');
             spanInBrain = sum(lab>0); 
-            if ~isempty(entryIdx) && (spanInBrain*spacing)>3.5e-3
+            if ~isempty(entryIdx) && (spanInBrain*spacing) > ELEC_LEN 
                 entryZYX = trajThroughBrain(:,max(1,entryIdx-1))';
                 
                 depthToLast = norm(trajThroughBrain(:,lastIdx)'-entryZYX);
@@ -91,6 +103,19 @@ classdef ElectrodeArray < handle
         end
         
         %% Geometry and computation methods
+        function dvmlap = site_lowest(E, ind)
+           low_end = min(E.site_coords(:,2)); 
+           dvmlap = dvmlap_alongprobe(E, low_end);
+           if nargin > 1, dvmlap = dvmlap(ind, :); end 
+        end
+        
+        function dvmlap = site_highest(E, ind)
+           high_end = max(E.site_coords(:,2)); 
+           dvmlap = dvmlap_alongprobe(E, high_end);
+           if nargin > 1, dvmlap = dvmlap(ind, :); end 
+        end
+
+        
         function dvmlap = dvmlap_exit(obj) % out of the brain
             
         end
@@ -125,8 +150,11 @@ classdef ElectrodeArray < handle
         %% Export / Display and Plotting methods
         function [fig_elec, tab_elec]= show_table(obj)
             s = obj.to_struct;
-            fig_elec = figure('color', 'w', 'toolbar', 'none', 'menubar', 'none', 'numbertitle',...
-                'off', 'name', 'Electrode List');
+            fig_elec  = findobj('type', 'figure', 'tag', 'fig_electrode_table');
+            if isempty(fig_elec)
+                fig_elec = figure('color', 'w', 'toolbar', 'none', 'menubar', 'none', 'numbertitle',...
+                    'off', 'name', 'Electrode List', 'tag', 'fig_electrode_table');
+            end
             tab_elec = uitable(fig_elec, 'Units', 'normalized', 'Position', [0 0 1 1]);
             tab_elec.Data = table2array(struct2table(s));
             tab_elec.ColumnName = fields(s);
