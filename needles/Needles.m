@@ -306,12 +306,13 @@ end
 
 
 function Update_Slices(hobj, evt, ap)
+NEAREST_DISTANCE_M = .00015;
 D = getappdata(hobj, 'Data');
 h = guidata(hobj);
 bc = D.atlas.brain_coor;
 % from the top axis handle line and associated text
 set(h.pl_top_apline, 'Xdata', ap([1 1]));
-ytxt = max(bc.xlim) - diff(bc.xlim)*0.05;
+ytxt = max(bc.xlim) - diff(bc.xlim) * 0.05;
 set(h.txt_top_apline, 'String', num2str(ap(1)*1e3, '%6.3f (mm) AP'), 'Position', [ap(1) ytxt 0])
 ap_slice = round(bc.y2i( ap(1)) );
 % display the coronal slices on the physio and MRI axes
@@ -329,26 +330,17 @@ if ~isempty(labind)
 end
 % Find the electrodes from the closest coronal plane
 [d, ie] = min(abs(ap(1) -  D.E.dvmlap_entry(:,3)));
-i1 = abs( D.E.dvmlap_entry(:,3) - D.E.dvmlap_entry(ie,3)) < .0003;
+i1 = abs( D.E.dvmlap_entry(:,3) - D.E.dvmlap_entry(ie,3)) < NEAREST_DISTANCE_M;
 % Plot Electrodes
 lineplot = @(xyz0,xyz1,n) flatten([xyz0(:,n) xyz1(:,n) xyz1(:,n).*NaN]');
 % plot 10 degres insertions, active shank and full track
 % i1 = D.E.esel & ie & abs(D.E.theta) == 10*pi/180;
-set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
-    'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
-    'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
+% set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
+%     'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
+%     'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
 set([h.pl_phy_electrodes_traj(1) h.pl_lab_electrodes_traj(1)],...
     'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
     'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
-% plot 20 degres insertions, active shank and full track
-% i2 = D.E.esel & ie & abs(D.E.theta) == 20*pi/180;
-% set([h.pl_phy_electrodes(2) h.pl_lab_electrodes(2)],...
-%     'xdata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),1),...
-%     'ydata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),3))
-% set([h.pl_phy_electrodes_traj(2) h.pl_lab_electrodes_traj(2)],...
-%     'xdata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),1),...
-%     'ydata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),3))
-
 
 function fig_main_KeyPressFcn(hobj, evt, h)
 h = guidata(h.fig_main);
