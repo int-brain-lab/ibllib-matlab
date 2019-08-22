@@ -42,4 +42,4 @@ uStr = uStr(ii);
 set(ax, 'YTick', trajX(round(uy)-1), 'YTickLabel', uStr, 'XTick', [], 'TickDir', 'out'); 
 box(ax, 'off'); 
 axis(ax, 'image');
-cmap = atlas.cmap; caxis([1 size(cmap,1)]); colormap(get(ax, 'Parent'), cmap);
+cmap = atlas.cmap; caxis(ax, [1 size(cmap,1)]); colormap(get(ax, 'Parent'), cmap);

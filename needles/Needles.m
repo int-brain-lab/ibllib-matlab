@@ -40,13 +40,14 @@ h.pref = io.read.json(pfile);
 h.fcn.Update_Slices = @Update_Slices;
 h.fcn.Update_txt_electrodes = @Update_txt_electrodes;
 h.fcn.Update_Electrodes = @electrodes_update;
-h.fcn.Load_Atlas =  @menu_file_loadatlas_Callback;
+h.fcn.Load_Atlas =  @load_atlas;
 % wrap-up and save in handles
 guidata(hobj, h);
 varargout{1} = h.output;
 
 
 function load_atlas(h, atlas_label)
+% possible labels: 'allen50', 'ibl50', 'dsurqe', 'waxholm'
 cmap = 'bone';
 switch true
     case startsWith(atlas_label, 'ibl')
@@ -96,7 +97,7 @@ h.pl_top_current_elec = plot(h.axes_top, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 
 % Create all the objects depending on the contrast axes
 h.im_phy = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_image(:,:,round(bc.y2i(0))), 'Parent', h.axes_phy);
-set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'normal')
 h.pl_phy_origin = plot(h.axes_phy, 0,0, 'r+');
 h.pl_phy_xr = plot(h.axes_phy, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_phy_zone = plot(h.axes_phy, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
@@ -109,8 +110,8 @@ h.pl_phy_current_elec = plot(h.axes_phy, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 xlabel(h.axes_phy, 'ML'), ylabel(h.axes_phy, 'DV')
 colormap(h.axes_phy, cmap)
 % Create all the objects depending on the label axes
-h.im_lab = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
-set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+h.im_lab = imagesc(-bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
+set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'normal')
 h.pl_lab_origin = plot(h.axes_label, 0,0, 'r+');
 h.pl_lab_xr = plot(h.axes_label, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_lab_zone = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
@@ -126,7 +127,8 @@ colormap(h.axes_label, cmap)
 set([h.pl_phy_xr, h.pl_lab_xr, h.pl_phy_zone, h.pl_lab_zone], 'Visible', 'Off')
 set(h.fig_main,'WindowButtonMotionFcn', {@fig_main_WindowButtonMotionFcn, h})
 % prevents from re-loading the Atlas for the time being
-set([h.menu_file_allen50, h.menu_file_dsurqe], 'Enable', 'off')
+set(h.menu_file, 'Enable', 'off')
+set(h.menu_3d_plot, 'Enable', 'on')
 h.txt_top_apline = text(NaN, NaN, '', 'Parent', h.axes_top, 'Color', color_from_index(2),'Fontsize',12, 'Fontweight', 'bold');
 guidata(h.fig_main, h)
 setappdata(h.fig_main, 'Data', D)
@@ -159,7 +161,6 @@ set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
 set( h.pl_top_current_elec,'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,3), 'ydata', D.E.dvmlap_entry(ie,2))
 drawnow
-% get(h.fig_main, 'SelectionType')
 if false && ishandle(h.fig_table_elec)
     get(h.table_elec)
     jUIScrollPane = findjobj(h.table_elec);
@@ -171,11 +172,12 @@ end
 try % FIXME test for other Atlases without cmap
 % this will have to move to a method of Electrode Map
 ie = ie(1);
-f = findobj('Name', 'Trajectory', 'type', 'figure');
+f = findobj('Name', 'Trajectory', 'type', 'figure', 'tag', 'fig_trajectory');
 if isempty(f)
-    f = figure('Color', 'w', 'Position', [200, 100, 380, 900], 'name', 'Trajectory', 'menubar', 'none', 'toolbar', 'none');
-    h_.ax1 = subplot(5,1,1, 'parent', f);
-    h_.ax2 = subplot(5,1,[2:5], 'parent', f);
+    f = figure('Color', 'w', 'Position', [200, 100, 380, 900], 'name', 'Trajectory',...
+        'menubar', 'none', 'toolbar', 'none', 'numbertitle', 'off', 'tag', 'fig_trajectory');
+    h_.ax1 = subplot(5, 1, 1, 'parent', f);
+    h_.ax2 = subplot(5, 1, [2 : 5], 'parent', f);
     guidata(f, h_);
 else
     h_ = guidata(f);
@@ -306,12 +308,13 @@ end
 
 
 function Update_Slices(hobj, evt, ap)
+NEAREST_DISTANCE_M = .00015;
 D = getappdata(hobj, 'Data');
 h = guidata(hobj);
 bc = D.atlas.brain_coor;
 % from the top axis handle line and associated text
 set(h.pl_top_apline, 'Xdata', ap([1 1]));
-ytxt = max(bc.xlim) - diff(bc.xlim)*0.05;
+ytxt = max(bc.xlim) - diff(bc.xlim) * 0.05;
 set(h.txt_top_apline, 'String', num2str(ap(1)*1e3, '%6.3f (mm) AP'), 'Position', [ap(1) ytxt 0])
 ap_slice = round(bc.y2i( ap(1)) );
 % display the coronal slices on the physio and MRI axes
@@ -329,26 +332,16 @@ if ~isempty(labind)
 end
 % Find the electrodes from the closest coronal plane
 [d, ie] = min(abs(ap(1) -  D.E.dvmlap_entry(:,3)));
-i1 = abs( D.E.dvmlap_entry(:,3) - D.E.dvmlap_entry(ie,3)) < .0003;
+i1 = abs( D.E.dvmlap_entry(:,3) - D.E.dvmlap_entry(ie,3)) < NEAREST_DISTANCE_M;
 % Plot Electrodes
 lineplot = @(xyz0,xyz1,n) flatten([xyz0(:,n) xyz1(:,n) xyz1(:,n).*NaN]');
-% plot 10 degres insertions, active shank and full track
-% i1 = D.E.esel & ie & abs(D.E.theta) == 10*pi/180;
+
 set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
-    'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
-    'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
+    'xdata', lineplot(D.E.site_lowest(i1), D.E.site_highest(i1),2),...
+    'ydata', lineplot(D.E.site_lowest(i1), D.E.site_highest(i1),1))
 set([h.pl_phy_electrodes_traj(1) h.pl_lab_electrodes_traj(1)],...
     'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
     'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
-% plot 20 degres insertions, active shank and full track
-% i2 = D.E.esel & ie & abs(D.E.theta) == 20*pi/180;
-% set([h.pl_phy_electrodes(2) h.pl_lab_electrodes(2)],...
-%     'xdata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),1),...
-%     'ydata', lineplot(D.E.xyz0(i2,:), D.E.xyz_(i2,:),3))
-% set([h.pl_phy_electrodes_traj(2) h.pl_lab_electrodes_traj(2)],...
-%     'xdata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),1),...
-%     'ydata', lineplot(D.E.xyz_entry(i2,:), D.E.xyz_exit(i2,:),3))
-
 
 function fig_main_KeyPressFcn(hobj, evt, h)
 h = guidata(h.fig_main);
@@ -418,3 +411,37 @@ load_atlas(h, 'dsurqe')
 function menu_electrode_table_Callback(hobj, evt, h)
 function menu_electrode_load_Callback(hobj, evt, h)
 function menu_electrode_write_Callback(hobj, evt, h)
+
+
+% --------------------------------------------------------------------
+function menu_3d_plot_Callback(hobj, evt, h)
+h = guidata(h.fig_main);
+D = getappdata(h.fig_main, 'Data');
+
+h3d = D.atlas.show();
+set(h3d.ax, 'NextPlot', 'add')
+pl3d = plot3(h3d.ax, D.E.dvmlap_entry(:,2), D.E.dvmlap_entry(:,3), D.E.dvmlap_entry(:,1), 'k*');
+set(h3d.p, 'FaceAlpha', 0.2)
+%% now display electrodes
+E = D.E;
+col = get(gca,'colororder');
+try delete(pl), end
+ie = find(E.pitch >= 0);
+high = E.site_highest(ie);
+low = E.site_lowest(ie);
+
+pl(1) = plot3((flatten([high(:,2) low(:,2) ie.*NaN ]')) ,...
+              (flatten([high(:,3) low(:,3) ie.*NaN ]')), ...
+              (flatten([high(:,1) low(:,1) ie.*NaN ]')), ...
+               'color', col(4,:), 'parent', h3d.ax);
+set(pl,'linewidth',1.5)
+
+ie = find(E.pitch < 0);
+high = E.site_highest(ie);
+low = E.site_lowest(ie);
+
+pl(2) = plot3((flatten([high(:,2) low(:,2) ie.*NaN ]')) ,...
+              (flatten([high(:,3) low(:,3) ie.*NaN ]')), ...
+              (flatten([high(:,1) low(:,1) ie.*NaN ]')), ...
+               'color', col(5,:), 'parent', h3d.ax);
+set(pl,'linewidth',1.5)

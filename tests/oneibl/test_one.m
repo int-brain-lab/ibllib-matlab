@@ -127,19 +127,10 @@ classdef test_one < matlab.unittest.TestCase
                 'alyx_url', 'https://test.alyx.internationalbrainlab.org');
             dtype = {'channels.rawRow', 'channels.site'};
             [eids, einfos] = testCase.one.search('data', dtype);
-            d = testCase.one.load(eids{1}, 'data', dtype, 'dclass_output', true);
-            
-            d.local_path
-            
-            
-            testCase.one.load_bulk()
-            
+            d = testCase.one.load(eids{1}, 'data', dtype, 'dclass_output', true);            
             
             einfo = structfun(@(x) x(1), einfos, 'UniformOutput', false);
-            [rr, cs] = testCase.one.load(einfo, 'data', dtype);
-            
-            
-            
+            [rr, cs] = testCase.one.load(einfo.url{1}, 'data', dtype);
             
         end
         
