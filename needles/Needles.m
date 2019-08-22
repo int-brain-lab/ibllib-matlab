@@ -83,7 +83,7 @@ set(h.table_elec, 'CellSelectionCallback', @table_e_cellSelection)
 bc = D.atlas.brain_coor;
 % Create all the objects depending on the top axes
 h.im_top = imagesc(bc.yscale, bc.xscale, D.atlas.surf_top', 'Parent', h.axes_top);
-set(h.axes_top, 'ydir', 'normal','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
+set(h.axes_top, 'ydir', 'reverse','DataAspectRatio',[1 1 1], 'NextPlot', 'add')
 set(h.axes_top,'UserData', round(bc.y2i(0))) % WIndow motion callback
 xlabel(h.axes_top, 'AP'), ylabel(h.axes_top, 'ML')
 colormap(h.axes_top, cmap);
@@ -97,7 +97,7 @@ h.pl_top_current_elec = plot(h.axes_top, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 
 % Create all the objects depending on the contrast axes
 h.im_phy = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_image(:,:,round(bc.y2i(0))), 'Parent', h.axes_phy);
-set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'reverse')
+set(h.axes_phy, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'normal')
 h.pl_phy_origin = plot(h.axes_phy, 0,0, 'r+');
 h.pl_phy_xr = plot(h.axes_phy, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_phy_zone = plot(h.axes_phy, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
@@ -110,8 +110,8 @@ h.pl_phy_current_elec = plot(h.axes_phy, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 xlabel(h.axes_phy, 'ML'), ylabel(h.axes_phy, 'DV')
 colormap(h.axes_phy, cmap)
 % Create all the objects depending on the label axes
-h.im_lab = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
-set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'reverse')
+h.im_lab = imagesc(-bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
+set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'normal')
 h.pl_lab_origin = plot(h.axes_label, 0,0, 'r+');
 h.pl_lab_xr = plot(h.axes_label, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
 h.pl_lab_zone = plot(h.axes_label, NaN, 0,'.','MarkerSize',4,'Color',color_from_index(5), 'ButtonDownFcn', @pl_zone_ButtonDownFcn);
@@ -127,7 +127,8 @@ colormap(h.axes_label, cmap)
 set([h.pl_phy_xr, h.pl_lab_xr, h.pl_phy_zone, h.pl_lab_zone], 'Visible', 'Off')
 set(h.fig_main,'WindowButtonMotionFcn', {@fig_main_WindowButtonMotionFcn, h})
 % prevents from re-loading the Atlas for the time being
-set([h.menu_file_allen50, h.menu_file_dsurqe], 'Enable', 'off')
+set(h.menu_file, 'Enable', 'off')
+set(h.menu_3d_plot, 'Enable', 'on')
 h.txt_top_apline = text(NaN, NaN, '', 'Parent', h.axes_top, 'Color', color_from_index(2),'Fontsize',12, 'Fontweight', 'bold');
 guidata(h.fig_main, h)
 setappdata(h.fig_main, 'Data', D)
@@ -410,3 +411,37 @@ load_atlas(h, 'dsurqe')
 function menu_electrode_table_Callback(hobj, evt, h)
 function menu_electrode_load_Callback(hobj, evt, h)
 function menu_electrode_write_Callback(hobj, evt, h)
+
+
+% --------------------------------------------------------------------
+function menu_3d_plot_Callback(hobj, evt, h)
+h = guidata(h.fig_main);
+D = getappdata(h.fig_main, 'Data');
+
+h3d = D.atlas.show();
+set(h3d.ax, 'NextPlot', 'add')
+pl3d = plot3(h3d.ax, D.E.dvmlap_entry(:,2), D.E.dvmlap_entry(:,3), D.E.dvmlap_entry(:,1), 'k*');
+set(h3d.p, 'FaceAlpha', 0.2)
+%% now display electrodes
+E = D.E;
+col = get(gca,'colororder');
+try delete(pl), end
+ie = find(E.pitch >= 0);
+high = E.site_highest(ie);
+low = E.site_lowest(ie);
+
+pl(1) = plot3((flatten([high(:,2) low(:,2) ie.*NaN ]')) ,...
+              (flatten([high(:,3) low(:,3) ie.*NaN ]')), ...
+              (flatten([high(:,1) low(:,1) ie.*NaN ]')), ...
+               'color', col(4,:), 'parent', h3d.ax);
+set(pl,'linewidth',1.5)
+
+ie = find(E.pitch < 0);
+high = E.site_highest(ie);
+low = E.site_lowest(ie);
+
+pl(2) = plot3((flatten([high(:,2) low(:,2) ie.*NaN ]')) ,...
+              (flatten([high(:,3) low(:,3) ie.*NaN ]')), ...
+              (flatten([high(:,1) low(:,1) ie.*NaN ]')), ...
+               'color', col(5,:), 'parent', h3d.ax);
+set(pl,'linewidth',1.5)

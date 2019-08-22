@@ -73,7 +73,7 @@ classdef ElectrodeArray < handle
             % not enabled
             
             % Z X Y is DV LR AP
-            ELEC_LEN = 3.5e-3
+            ELEC_LEN = 3.5e-3;
             a = sind(angles(2)); b = cosd(angles(2));
             vec = [a b 0];
             
