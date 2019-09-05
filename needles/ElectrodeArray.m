@@ -103,6 +103,15 @@ classdef ElectrodeArray < handle
         end
         
         %% Geometry and computation methods
+        function dvmlap = sites_dvmlap(E, ind)
+            dvmlap = zeros(size(E.site_coords(:,2), 1), 3); 
+            for m = 1: size(dvmlap, 1)
+                 a = dvmlap_alongprobe(E, E.site_coords(m,2));
+                 dvmlap(m, :) = a(ind, :);                 
+            end
+       
+        end
+        
         function dvmlap = site_lowest(E, ind)
            low_end = min(E.site_coords(:,2)); 
            dvmlap = dvmlap_alongprobe(E, low_end);
@@ -161,6 +170,7 @@ classdef ElectrodeArray < handle
         end
         
         function plot_brain_loc(obj, idx, ax, atlas) 
+            % e.plot_brain_loc(obj, idx, ax, atlas) 
             % idx is the electrode for which the plot should be made
             % ax is the axis into which to plot
             
@@ -175,14 +185,13 @@ classdef ElectrodeArray < handle
             
             vectorEnd = tip+vectorDir*recordArrayBottom;
             vectorStart = tip+vectorDir*recordArrayTop;
-            
             plotTrajectory(ax, atlas, vectorStart, vectorEnd);
             
         end
         
         function h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
 %             h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
-
+   
             if nargin <= 4, ie = []; end
             
             these = obj.dvmlap_entry(:,3)==apCoord;
@@ -220,7 +229,7 @@ classdef ElectrodeArray < handle
                 end
             end
             %xlabel('LR'); ylabel('DV');
-            axis(ax, 'off')
+%             axis(ax, 'off')
             set(ax, 'YDir', 'reverse');
         end
         

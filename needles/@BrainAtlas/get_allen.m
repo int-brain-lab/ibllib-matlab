@@ -30,7 +30,7 @@ vol_image = flip(permute(vol_image,[1,3,2]),3);
 
 % this takes a while but allows direct indexing and a grayscale colorbar
 [id, ~] = unique(vol_labels_orig(:));
-labels.index = id.*0;
+[labels.index, labels.table_index] = deal(id.*0);
 vol_labels = zeros(size(vol_labels_orig), 'uint16');
 for m = 1:length(id)
     if id(m)==0
@@ -41,6 +41,7 @@ for m = 1:length(id)
     vol_labels(vol_labels_orig==id(m)) = ind-1;    
     labels.index(m) = ind -1;
     labels.name{m} = labels.table.name{ind};
+    labels.table_index(m) = id(m);
 end
 
 BREGMA = (BREGMA * 10/res_um);
