@@ -124,28 +124,26 @@ classdef ElectrodeArray < handle
            if nargin > 1, dvmlap = dvmlap(ind, :); end 
         end
 
-        
-        function dvmlap = dvmlap_exit(obj) % out of the brain
-            
-        end
                 
-        function [yaw, pitch, r] = cart2sph(obj, ind)
+        function [az, el, r] = cart2sph_(obj, ind)
             % from dvmlap_entry and dvmlap_tip, returns az, el, r
             if nargin < 2, ind = 1:obj.n; end
             d =  obj.dvmlap_tip(ind,:) -  obj.dvmlap_entry(ind,:);
-            [yaw, pitch, r] = cart2sph(d(:,3), d(:,1), d(:,2));
-            pitch = pitch .* 180 / pi;
-            yaw = yaw .* 180 / pi;
+            [az, el, r] = cart2sph(d(:,2), d(:,3), d(:,1));
+            el = el.* 180 / pi;
+            az = az.* 180 / pi;
         end
         
-        function y = yaw(obj, ind) % rotation around D-V axis. Zero is anterior; positive is CCW (i.e. left). Azimuth angle
+        function az = azimuth(obj, ind)
+            % angle from right in horizontal plane, clockwise, [-180 180]
             if nargin < 2, ind = 1:obj.n; end
-            y = cart2sph(obj, ind);
+            az = cart2sph_(obj, ind);
         end
         
-        function p = pitch(obj, ind) % rotation around L-R axis. Zero straight down, right is positive. Elevation angle
+        function el = elevation(obj, ind)
+            % angle from horizontal, direct [-90 90]
             if nargin < 2, ind = 1:obj.n; end
-            [~, p] = cart2sph(obj, ind);
+            [~, el] = cart2sph_(obj, ind);
         end
         
         function r = recording_length(obj, ind) % length of the part of the probe with active sites within the brain
@@ -153,7 +151,7 @@ classdef ElectrodeArray < handle
         
         function r = insertion_length(obj, ind) % distance between the tip of the probe and the insertion point
             if nargin < 2, ind = 1:obj.n; end
-            [~, ~, r] = cart2sph(obj, ind);
+            [~, ~, r] = cart2sph_(obj, ind);
         end
         
         %% Export / Display and Plotting methods
@@ -285,12 +283,12 @@ classdef ElectrodeArray < handle
             s = struct('coronal_index', self.coronal_index,...
                        'sagittal_index', self.sagittal_index,...
                        'index', self.index,...
-                       'ap_in', round(self.dvmlap_entry(:,3)*1e5)/1e2,... % units mm, this rounding gets 2 decimal places in the output
-                       'ml_in', round(self.dvmlap_entry(:,2)*1e5)/1e2,...
-                       'dv_in', round(self.dvmlap_entry(:,1)*1e5)/1e2,...
-                       'insertion_length', round(self.insertion_length*1e5)/1e2,...
-                       'pitch', self.pitch,...
-                       'yaw', self.yaw);
+                       'ap_um', round(self.dvmlap_entry(:,3)*1e6),... % units mm, this rounding gets 2 decimal places in the output
+                       'ml_um', round(self.dvmlap_entry(:,2)*1e6),...
+                       'dv_um', -round(self.dvmlap_entry(:,1)*1e6),...
+                       'depth_um', round(self.insertion_length*1e6),...
+                       'elevation', self.elevation,...
+                       'azimuth', self.azimuth);
         end
         
         function to_csv(self, output_file)

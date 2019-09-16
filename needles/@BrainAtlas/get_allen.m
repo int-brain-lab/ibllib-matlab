@@ -4,7 +4,7 @@ function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_u
 % http://help.brain-map.org/display/mousebrain/API#API-DownloadImages
 % http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/
 
-BREGMA = [0, 570, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
+BREGMA = [0+80, 570+3.9, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
 
 p = inputParser;
 p.addOptional('res_um', 50);
@@ -25,8 +25,9 @@ labels.table = readtable(file_label_csv);
 [vol_image, hn] = io.read.nrrd(nrd_file_nissl );
 % Organization in memory should reflect most frequent usage: coronal first, sagittal second and transverse last
 % This is not important if the file is small, for a large file and memory mapping this will make the difference between usable and unusable
+% V has dimensions (n_dv, n_ml, n_ap)
 vol_labels_orig = flip(permute(vol_labels_orig,[1,3,2]),3); 
-vol_image = flip(permute(vol_image,[1,3,2]),3); 
+vol_image = flip(permute(vol_image,[1,3,2]),3);
 
 % this takes a while but allows direct indexing and a grayscale colorbar
 [id, ~] = unique(vol_labels_orig(:));

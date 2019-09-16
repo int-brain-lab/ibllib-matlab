@@ -47,10 +47,10 @@ classdef test_ElectrodeArray < matlab.unittest.TestCase
         function test_cartesian2spherical(testCase)
             %% 1:10:200
             E = testCase.E2;
-            expected_pitch = [10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;20;20;20;20];
-            expected_yaw = 90;
-            testCase.assertTrue(all(round(E.pitch) == expected_pitch ))
-            testCase.assertTrue(all(round(E.yaw) == expected_yaw ))
+            expected_el = 90 - [10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;20;20;20;20];
+            expected_az = 0;
+            testCase.assertTrue(all(round(E.elevation) == expected_el ))
+            testCase.assertTrue(all(round(E.azimuth) == expected_az ))
         end
         
         function test_active_bounds(self)
