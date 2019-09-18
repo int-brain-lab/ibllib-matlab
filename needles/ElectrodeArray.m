@@ -125,33 +125,37 @@ classdef ElectrodeArray < handle
         end
 
                 
-        function [az, el, r] = cart2sph_(obj, ind)
+        function [r, theta, phi] = cart2sph_(obj, ind)
             % from dvmlap_entry and dvmlap_tip, returns az, el, r
             if nargin < 2, ind = 1:obj.n; end
             d =  obj.dvmlap_tip(ind,:) -  obj.dvmlap_entry(ind,:);
-            [az, el, r] = cart2sph(d(:,2), d(:,3), d(:,1));
-            el = el.* 180 / pi;
-            az = az.* 180 / pi;
+            [phi, theta, r] = cart2sph(d(:,2), d(:,3), d(:,1));
+            theta = mod(90 - theta .* 180 / pi, 180);
+            phi = phi.* 180 / pi;
         end
         
-        function az = azimuth(obj, ind)
-            % angle from right in horizontal plane, clockwise, [-180 180]
+        function phi = phi(obj, ind)
+            % angle from right in horizontal plane, clockwise, [-180 180] in degrees
             if nargin < 2, ind = 1:obj.n; end
-            az = cart2sph_(obj, ind);
+            [~, ~, phi] = cart2sph_(obj, ind);
         end
         
-        function el = elevation(obj, ind)
-            % angle from horizontal, direct [-90 90]
+        function theta = theta(obj, ind)
+            % polar angle (from vertical) [0 - 180] in degrees
             if nargin < 2, ind = 1:obj.n; end
-            [~, el] = cart2sph_(obj, ind);
+            [~, theta] = cart2sph_(obj, ind);
         end
         
         function r = recording_length(obj, ind) % length of the part of the probe with active sites within the brain
         end
         
+        function r = depth(varargin)
+            r = insertion_length(varargin{:});
+        end
+        
         function r = insertion_length(obj, ind) % distance between the tip of the probe and the insertion point
             if nargin < 2, ind = 1:obj.n; end
-            [~, ~, r] = cart2sph_(obj, ind);
+            r = cart2sph_(obj, ind);
         end
         
         %% Export / Display and Plotting methods
@@ -286,9 +290,9 @@ classdef ElectrodeArray < handle
                        'ap_um', round(self.dvmlap_entry(:,3)*1e6),... % units mm, this rounding gets 2 decimal places in the output
                        'ml_um', round(self.dvmlap_entry(:,2)*1e6),...
                        'dv_um', -round(self.dvmlap_entry(:,1)*1e6),...
-                       'depth_um', round(self.insertion_length*1e6),...
-                       'elevation', self.elevation,...
-                       'azimuth', self.azimuth);
+                       'depth_um', round(self.depth*1e6),...
+                       'theta', round(self.theta*10)/10,...
+                       'phi', round(self.phi*10)/10);
         end
         
         function to_csv(self, output_file)

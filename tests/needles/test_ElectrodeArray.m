@@ -41,16 +41,18 @@ classdef test_ElectrodeArray < matlab.unittest.TestCase
             self.assertTrue( all(E.insertion_length == .035))
             % try indexing the array
             self.assertTrue( length(E.insertion_length(1:5)) == 5)
+            % try with the depth alias
+            self.assertTrue( all(E.depth == .035))
         end
         
         
         function test_cartesian2spherical(testCase)
             %% 1:10:200
             E = testCase.E2;
-            expected_el = 90 - [10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;20;20;20;20];
-            expected_az = 0;
-            testCase.assertTrue(all(round(E.elevation) == expected_el ))
-            testCase.assertTrue(all(round(E.azimuth) == expected_az ))
+            expected_theta = [10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;20;20;20;20];
+            expected_phi = 0;
+            testCase.assertTrue(all(round(E.theta) == expected_theta ))
+            testCase.assertTrue(all(round(E.phi) == expected_phi ))
         end
         
         function test_active_bounds(self)

@@ -169,7 +169,7 @@ if false && ishandle(h.fig_table_elec)
 end
 
 
-try % FIXME test for other Atlases without cmap
+
 % this will have to move to a method of Electrode Map
 ie = ie(1);
 f = findobj('Name', 'Trajectory', 'type', 'figure', 'tag', 'fig_trajectory');
@@ -184,13 +184,13 @@ else
 end
 entry = D.E.dvmlap_entry(ie,:)*1e3;
 tip = D.E.dvmlap_tip(ie,:)*1e3;
-angle = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
+angle = D.E.theta(ie);
 
 % slice
 D.E.plot_probes_at_slice(D.atlas, h_.ax1, ap_current, ie);
-title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(angle)));
+title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(D.E.theta(ie))));
 D.E.plot_brain_loc(ie, h_.ax2, D.atlas);
-end
+
 
 function table_e_cellSelection(hobj, evt)
 set(hobj, 'UserData', evt)
@@ -278,9 +278,9 @@ set(h.txt_electrode, 'Visible', 'on', 'String', { '', ...
     ['ML: ' num2str(D.E.dvmlap_entry(ie(1),2)*1e3, '%6.3f (mm)')],...
     ['AP: ' num2str(D.E.dvmlap_entry(ie(1),3)*1e3, '%6.3f (mm)')],...
     ['DV: ' num2str(D.E.dvmlap_entry(ie(1),1)*1e3, '%6.3f (mm)')],...
-    ['Azimuth: ' num2str(D.E.azimuth(ie(1)), '%3.0f (deg)')],...
-    ['Elevation: ' num2str(D.E.elevation(ie(1)), '%3.0f (deg)')],...
-    ['Depth: ' num2str(D.E.insertion_length(ie(1))*1e3, '%6.3f (mm)')],...
+    ['Theta: ' num2str(D.E.theta(ie(1)), '%3.0f (deg)')],...
+    ['Phi: ' num2str(D.E.phi(ie(1)), '%3.0f (deg)')],...
+    ['Depth: ' num2str(D.E.depth(ie(1))*1e3, '%6.3f (mm)')],...
     });
 
 
