@@ -42,7 +42,7 @@ for u = 1:(numel(dLab)-1)
     plot([0.5 1.5], trajX(dLab(u))*[1 1]-0.5*spacing, 'Color', [0.5 0.5 0.5], 'LineWidth', 0.5);
     itable = tind(dLab(u));
     if itable == 0
-        sStr{u} = 'OUT';
+        uStr{u} = 'OUT';
     else
         uStr{u} = atlas.labels.table.acronym{itable};
     end
