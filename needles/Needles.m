@@ -338,6 +338,13 @@ set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
 set([h.pl_phy_electrodes_traj(1) h.pl_lab_electrodes_traj(1)],...
     'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
     'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
+if abs(ap(1)) < 50 * 1e-6
+    set([h.pl_phy_origin h.pl_lab_origin], 'markersize', 12, 'linewidth', 2)
+else
+    set([h.pl_phy_origin h.pl_lab_origin], 'markersize', 6, 'linewidth', 0.5)
+end
+
+
 
 function fig_main_KeyPressFcn(hobj, evt, h)
 h = guidata(h.fig_main);
