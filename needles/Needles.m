@@ -273,14 +273,18 @@ h = guidata(hobj);
 D = getappdata(h.fig_main, 'Data');
 set(h.pan_electrode, 'Visible', 'on');
 s = D.E.to_struct(ie(1));
-str = cellfun( @(ff) [ff ':  ' num2str(s.(ff))], fieldnames(s), 'UniformOutput', false);
-set(h.txt_electrode, 'Visible', 'on', 'String', str)
+fn = fieldnames(s);
+str = cellfun( @(ff) [ff ':  ' num2str(s.(ff))], fn(4:end), 'UniformOutput', false);
+set(h.txt_electrode1, 'Visible', 'on', 'String', [{''} ; str])
+str = cellfun( @(ff) [ff ':  ' num2str(s.(ff))], fn(1:3), 'UniformOutput', false);
+set(h.txt_electrode2, 'Visible', 'on', 'String', [{''} ; str])
 
 
 function Update_txt_xyz(hobj, ml, ap, dv)
 h = guidata(hobj);
 set(h.pan_xyz, 'Visible', 'on')
-set(h.txt_xyz, 'String', {[num2str(ml.*1e3, '%6.3f ML (mm)')],'',...
+set(h.txt_xyz, 'String', {'',...
+                          [num2str(ml.*1e3, '%6.3f ML (mm)')],'',...
                           [num2str(ap.*1e3, '%6.3f AP(mm)')],'',...
                           [num2str(dv.*1e3, '%6.3f DV (mm)')]},...
                           'Visible', 'on')
