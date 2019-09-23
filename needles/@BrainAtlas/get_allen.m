@@ -4,7 +4,7 @@ function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_u
 % http://help.brain-map.org/display/mousebrain/API#API-DownloadImages
 % http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/ara_nissl/
 
-BREGMA = [0+80, 570+3.9, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
+BREGMA = [0+33.2, 570+3.9, 1320-540]; % Bregma indices DV ML AP for the 10nm Atlas
 
 p = inputParser;
 p.addOptional('res_um', 50);
