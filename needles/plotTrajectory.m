@@ -18,6 +18,14 @@ allSamp = startSamp+trajX'*vectorDir;
 
 lab = labelsAlongVector(atlas, allSamp);
 
+% the indices from the volume do not map directly to the table provided
+[~, ilab] = ismember(uint32(lab), atlas.labels.index);
+[iok, tind] = ismember(atlas.labels.table_index(ilab), atlas.labels.table.id);
+brainLocations = cellfun(@(x) 'OUT', cell(length(ilab), 1), 'UniformOutput', false);
+brainLocations(iok) = atlas.labels.table.acronym(tind(iok));
+
+
+
 % plot the areas
 trajX = trajX*trajScale; spacing = spacing*trajScale; padding = padding*trajScale;
 im = imagesc(1, trajX, lab, 'Parent', ax);
@@ -32,7 +40,12 @@ if dLab(end)~=numel(lab); dLab(end+1) = numel(lab); end
 for u = 1:(numel(dLab)-1)
     uy(u) = mean(dLab(u:u+1));
     plot([0.5 1.5], trajX(dLab(u))*[1 1]-0.5*spacing, 'Color', [0.5 0.5 0.5], 'LineWidth', 0.5);
-    uStr{u} = atlas.labels.table.acronym{lab(dLab(u))+1};
+    itable = tind(dLab(u));
+    if itable == 0
+        uStr{u} = 'OUT';
+    else
+        uStr{u} = atlas.labels.table.acronym{itable};
+    end
 end
 
 [uy,ii] = sort(uy); 

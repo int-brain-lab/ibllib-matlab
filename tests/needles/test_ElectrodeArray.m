@@ -41,16 +41,33 @@ classdef test_ElectrodeArray < matlab.unittest.TestCase
             self.assertTrue( all(E.insertion_length == .035))
             % try indexing the array
             self.assertTrue( length(E.insertion_length(1:5)) == 5)
+            % try with the depth alias
+            self.assertTrue( all(E.depth == .035))
         end
         
         
         function test_cartesian2spherical(testCase)
             %% 1:10:200
             E = testCase.E2;
-            expected_pitch = [10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;20;20;20;20];
-            expected_yaw = 90;
-            testCase.assertTrue(all(round(E.pitch) == expected_pitch ))
-            testCase.assertTrue(all(round(E.yaw) == expected_yaw ))
+            expected_theta = [10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;10;20;20;20;20];
+            expected_phi = 180;
+            testCase.assertTrue(all(round(E.theta) == expected_theta ))
+            testCase.assertTrue(all(round(E.phi) == expected_phi ))
+            % NB: for now in Needles the depth is positive
+            [r, theta, phi] = E.cart2sph_d([1, 0, 0]);
+            testCase.assertTrue(all([r, theta, phi] == [1, 0, 0]))
+            % the electrode goes to the right
+            [r, theta, phi] = E.cart2sph_d([1, 1, 0]);
+            testCase.assertTrue(all([r, theta, phi] == [sqrt(2), 45, 180]))
+            % the electrode goes to the left
+            [r, theta, phi] = E.cart2sph_d([1, -1, 0]);
+            testCase.assertTrue(all([r, theta, phi] == [sqrt(2), 45, 0]))
+            % the electrode goes to the front
+            [r, theta, phi] = E.cart2sph_d([1, 0, 1]);
+            testCase.assertTrue(all([r, theta, phi] == [sqrt(2), 45, 90]))
+            % the electrode goes to the back
+            [r, theta, phi] = E.cart2sph_d([1, 0, -1]);
+            testCase.assertTrue(all([r, theta, phi] == [sqrt(2), 45, -90]))            
         end
         
         function test_active_bounds(self)

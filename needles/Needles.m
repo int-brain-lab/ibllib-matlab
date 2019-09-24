@@ -20,7 +20,7 @@ end
 
 function Needles_OpeningFcn(hobj, evt, h, varargin)
 h.output = hobj;
-h.ver = '1.0.0';
+h.ver = '1.0.1';
 setappdata(0, 'Needles', h.fig_main)
 guidata(hobj, h);
 set(h.menu_electrode, 'Enable', 'off')
@@ -110,7 +110,7 @@ h.pl_phy_current_elec = plot(h.axes_phy, NaN, NaN, '*', 'color', 'm', 'MarkerSiz
 xlabel(h.axes_phy, 'ML'), ylabel(h.axes_phy, 'DV')
 colormap(h.axes_phy, cmap)
 % Create all the objects depending on the label axes
-h.im_lab = imagesc(-bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
+h.im_lab = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_labels(:,:,round(bc.y2i(0))), 'Parent', h.axes_label);
 set(h.axes_label, 'DataAspectRatio',[1 1 1], 'NextPlot', 'add', 'xdir', 'normal')
 h.pl_lab_origin = plot(h.axes_label, 0,0, 'r+');
 h.pl_lab_xr = plot(h.axes_label, [bc.xlim NaN 0 0], [0 0 NaN bc.ylim], 'Color', color_from_index(2));
@@ -169,7 +169,7 @@ if false && ishandle(h.fig_table_elec)
 end
 
 
-try % FIXME test for other Atlases without cmap
+
 % this will have to move to a method of Electrode Map
 ie = ie(1);
 f = findobj('Name', 'Trajectory', 'type', 'figure', 'tag', 'fig_trajectory');
@@ -184,13 +184,13 @@ else
 end
 entry = D.E.dvmlap_entry(ie,:)*1e3;
 tip = D.E.dvmlap_tip(ie,:)*1e3;
-angle = atand((entry(2)-tip(2))/(entry(1)-tip(1)));
+angle = D.E.theta(ie);
 
 % slice
 D.E.plot_probes_at_slice(D.atlas, h_.ax1, ap_current, ie);
-title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(angle)));
+title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(D.E.theta(ie))));
 D.E.plot_brain_loc(ie, h_.ax2, D.atlas);
-end
+
 
 function table_e_cellSelection(hobj, evt)
 set(hobj, 'UserData', evt)
@@ -272,19 +272,19 @@ function Update_txt_electrodes(hobj, ie)
 h = guidata(hobj);
 D = getappdata(h.fig_main, 'Data');
 set(h.pan_electrode, 'Visible', 'on');
-set(h.txt_electrode, 'Visible', 'on', 'String', { '', ...
-    ['Line: ' num2str(D.E.coronal_index(ie(1)), '%04.0f')], ...
-    ['Point: ' num2str(D.E.sagittal_index(ie(1)), '%04.0f')], ...
-    ['AP: ' num2str(D.E.dvmlap_entry(ie(1),3)*1e3, '%6.3f (mm)')],...
-    ['ML: ' num2str(D.E.dvmlap_entry(ie(1),2)*1e3, '%6.3f (mm)')]});
-%     ['Depths (shallow): ' num2str(D.E.length(ie(1)',1)*1e6, '%06.0f (um)')],...
-%     ['Depths (deep): ' num2str(D.E.length(ie(2)',1)*1e6, '%06.0f (um)')]},...
+s = D.E.to_struct(ie(1));
+fn = fieldnames(s);
+str = cellfun( @(ff) [ff ':  ' num2str(s.(ff))], fn(4:end), 'UniformOutput', false);
+set(h.txt_electrode1, 'Visible', 'on', 'String', [{''} ; str])
+str = cellfun( @(ff) [ff ':  ' num2str(s.(ff))], fn(1:3), 'UniformOutput', false);
+set(h.txt_electrode2, 'Visible', 'on', 'String', [{''} ; str])
 
 
 function Update_txt_xyz(hobj, ml, ap, dv)
 h = guidata(hobj);
 set(h.pan_xyz, 'Visible', 'on')
-set(h.txt_xyz, 'String', {[num2str(ml.*1e3, '%6.3f ML (mm)')],'',...
+set(h.txt_xyz, 'String', {'',...
+                          [num2str(ml.*1e3, '%6.3f ML (mm)')],'',...
                           [num2str(ap.*1e3, '%6.3f AP(mm)')],'',...
                           [num2str(dv.*1e3, '%6.3f DV (mm)')]},...
                           'Visible', 'on')
@@ -342,6 +342,13 @@ set([h.pl_phy_electrodes(1) h.pl_lab_electrodes(1)],...
 set([h.pl_phy_electrodes_traj(1) h.pl_lab_electrodes_traj(1)],...
     'xdata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),2),...
     'ydata', lineplot(D.E.dvmlap_entry(i1,:), D.E.dvmlap_tip(i1,:),1))
+if abs(ap(1)) < 50 * 1e-6
+    set([h.pl_phy_origin h.pl_lab_origin], 'markersize', 12, 'linewidth', 2)
+else
+    set([h.pl_phy_origin h.pl_lab_origin], 'markersize', 6, 'linewidth', 0.5)
+end
+
+
 
 function fig_main_KeyPressFcn(hobj, evt, h)
 h = guidata(h.fig_main);
