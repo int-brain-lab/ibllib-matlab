@@ -20,7 +20,7 @@ end
 
 function Needles_OpeningFcn(hobj, evt, h, varargin)
 h.output = hobj;
-h.ver = '1.0.1';
+h.ver = '1.0.2';
 setappdata(0, 'Needles', h.fig_main)
 guidata(hobj, h);
 set(h.menu_electrode, 'Enable', 'off')

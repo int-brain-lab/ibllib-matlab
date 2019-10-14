@@ -17,7 +17,12 @@ for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
 file_label_csv = [atlas_path filesep 'structure_tree_safe_2017.csv'];
 
 nrd_file_annotations =  [atlas_path filesep 'annotation_' num2str(res_um) '.nrrd'];
-nrd_file_nissl =  [atlas_path filesep 'ara_nissl_' num2str(res_um) '.nrrd'];
+nrd_file_nissl =  [atlas_path filesep 'average_template_' num2str(res_um) '.nrrd'];
+
+if ~exist(nrd_file_nissl, 'file')
+    warning('Atlas template file not found, trying to load ara nissl instead')
+    nrd_file_nissl =  [atlas_path filesep 'ara_nissl_' num2str(res_um) '.nrrd'];
+end
 
 res = res_um/1e6;
 labels.table = readtable(file_label_csv);
