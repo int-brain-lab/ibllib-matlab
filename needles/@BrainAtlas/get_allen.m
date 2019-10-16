@@ -14,7 +14,7 @@ p.parse(varargin{:});
 p.parse(varargin{:});
 for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
 
-file_label_csv = [atlas_path filesep 'structure_tree_safe_2017.csv'];
+file_label_csv = [fileparts(which('BrainAtlas')) filesep 'allen_structure_tree.csv'];
 
 nrd_file_annotations =  [atlas_path filesep 'annotation_' num2str(res_um) '.nrrd'];
 nrd_file_nissl =  [atlas_path filesep 'average_template_' num2str(res_um) '.nrrd'];
