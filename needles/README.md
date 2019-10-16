@@ -10,6 +10,7 @@ Earliers versions need to install the Json lab toolbox https://github.com/fangq/
 You will need the average_template and the annotation volume.
 For IBL, files are in google drive / WG-Physiology/Resources/Brain Atlases/Allen50:
 - 	https://drive.google.com/drive/u/0/folders/1x9zVNWtUofVA0FTmCKPwQcj2PbH_wBoD
+
 Files are also publicly available from the Allen Brain Institute servers:
 -   http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/
 
