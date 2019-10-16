@@ -15,7 +15,7 @@ https://ibllib.readthedocs.io/en/latest/03a_installation_matlab.html
 https://ibllib.readthedocs.io/en/latest/03b_tutorial_matlab.html
 
 ### Needles GUI
-Install notes for Needles are  in the [README.md]([a relative link](needles/README.md)) (in the Needles folder).
+Install notes for Needles are  in the [README.md](needles/README.md) (in the Needles folder).
 
 ## Requirements
 **Matlab Module**: Matlab R2016b or higher (jsonencode function).
