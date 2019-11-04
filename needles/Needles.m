@@ -133,6 +133,7 @@ h.txt_top_apline = text(NaN, NaN, '', 'Parent', h.axes_top, 'Color', color_from_
 guidata(h.fig_main, h)
 setappdata(h.fig_main, 'Data', D)
 set(h.pan_electrode, 'Visible', 'on')
+set(h.pb_search, 'Visible', 'on')
 
 function electrodes_update(hobj, evt, E)
 h = guidata(hobj);
@@ -167,9 +168,6 @@ if false && ishandle(h.fig_table_elec)
     jUITable = jUIScrollPane.getViewport.getView;
     jUITable.changeSelection(ie, 0, false, false);
 end
-
-
-
 % this will have to move to a method of Electrode Map
 ie = ie(1);
 f = findobj('Name', 'Trajectory', 'type', 'figure', 'tag', 'fig_trajectory');
@@ -204,8 +202,10 @@ D = getappdata(h.fig_main,'Data');
 bc = D.atlas.brain_coor;
 plock = [h.pl_lab_zone_lock h.pl_phy_zone_lock];
 labind = get(h.pl_lab_zone, 'userdata');
-set(plock,'xdata', get(h.pl_lab_zone, 'xdata') ,'ydata', get(h.pl_lab_zone, 'ydata'), 'userdata', labind)
-set(h.txt_labels_lock, 'String', get(h.txt_labels, 'string'), 'Visible', 'on')
+yi = round(bc.y2i(get(h.pl_top_apline,'xdata')));
+[x,z]= find(D.atlas.vol_labels(:,:,yi)== labind);
+set(plock, 'xdata', bc.i2x(z), 'ydata', bc.i2z(x), 'visible', 'on', 'UserData', labind)
+set(h.txt_labels_lock, 'String', D.atlas.labels.name{D.atlas.labels.index==labind}, 'Visible', 'on')
 [iml, iap] = find(squeeze(sum(D.atlas.vol_labels(:,:,:)== labind, 1)));
 set(h.pl_top_zone_lock, 'xdata', bc.i2y(iap), 'ydata', bc.i2x(iml))
 
@@ -348,8 +348,6 @@ else
     set([h.pl_phy_origin h.pl_lab_origin], 'markersize', 6, 'linewidth', 0.5)
 end
 
-
-
 function fig_main_KeyPressFcn(hobj, evt, h)
 h = guidata(h.fig_main);
 D = getappdata(h.fig_main, 'Data');
@@ -371,11 +369,20 @@ switch true
     case strcmp(evt.Key, 'rightarrow')
         ap_slice = round(bc.y2i( ap(1)) ) + 1;
         ap_new = bc.i2y(ap_slice);
+    case strcmp(evt.Key, 'g') & strcmp(evt.Modifier,'control')
+        menu_select_region_Callback(hobj, evt, h)
+        return
     otherwise, return
 end
-
 Update_Slices(hobj, [], ap_new)
 Update_txt_xyz(hobj, NaN,  ap_new, NaN)
+
+function menu_select_region_Callback(hobj, evt, h)
+[labind, name] = uigetbrainlabel;
+if isempty(labind), return, end
+set(h.pl_lab_zone, 'userdata', labind);
+pl_zone_ButtonDownFcn(hobj, [])
+
 
 function menu_about_Callback(hobj, evt, h)
 h = guidata(hobj);
