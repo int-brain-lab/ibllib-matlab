@@ -1,9 +1,12 @@
 {
-  "allen": {
-    "path": "/datadisk/BrainAtlas/ATLASES/Allen"
-  },
-  "dsurqe": {
-    "path": "/datadisk/BrainAtlas/ATLASES/DSURQE_40micron",
-    "lateralize": true
-  }
+ "allen": {
+ "path": "/datadisk/BrainAtlas/ATLASES/Allen"
+},
+ "dsurqe": {
+ "path": "/home/olivier/Documents/MATLAB/ibllib-matlab/dsurqe",
+ "lateralize": true
+},
+ "waxholm": {
+ "path": "/home/olivier/Documents/MATLAB/ibllib-matlab/waxholm"
+}
 }

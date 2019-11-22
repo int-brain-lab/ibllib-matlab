@@ -22,10 +22,14 @@ classdef BrainAtlas
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_ibl(atlas_path, 50);
                 case 'ibl25'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_ibl(atlas_path, 25);
+                case 'ibl10'
+                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_ibl(atlas_path, 10); 
                 case 'allen50'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 25);
                 case 'allen25'
-                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_ibl(atlas_path, 50);
+                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 50);
+                case 'allen10'
+                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 10);
                 case 'dsurqe'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels] = obj.get_dsurqe(atlas_path);
                 otherwise
