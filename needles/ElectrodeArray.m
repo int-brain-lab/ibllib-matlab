@@ -63,6 +63,20 @@ classdef ElectrodeArray < handle
             obj.index = [];
         end
         
+        function self = add_probe(self, dv, ml, ap, theta, phi, depth)
+            % e.add_probe(self, dv, ml, ap, theta, phi, depth)
+            % dv, ml, ap: insertion points coordinates (m)
+            % theta: polar angle (degrees)
+            % phi: azimuth (degrees)
+            [tml, tap, tdv] = ElectrodeArray.sph2cart_d(depth, theta, phi);
+            self.dvmlap_tip(end + 1, :) = [dv, ml, ap] - [tdv, tml, tap];
+            self.dvmlap_entry(end + 1, :) = [dv, ml, ap];
+            self.probe_roll(end + 1, :) = 0;
+            self.coronal_index(end + 1, :) = 0;
+            self.sagittal_index(end + 1, :) = 0;
+            self.n = self.n + 1;
+        end
+        
         function obj = add_probe_by_start_angles(obj, startCoord, angles, depth, atlas, corIdx, sagIdx)
             % angles are [yaw pitch roll] from the P->A axis. Roll doesn't
             % determine the vector but is stored. Depth is relative to
@@ -127,8 +141,8 @@ classdef ElectrodeArray < handle
         function [r, theta, phi] = cart2sph_(obj, ind)
             % from dvmlap_entry and dvmlap_tip, returns az, el, r
             if nargin < 2, ind = 1:obj.n; end
-            d =  obj.dvmlap_tip(ind,:) -  obj.dvmlap_entry(ind,:);
-            [r, theta, phi] = obj.cart2sph_d(d);
+            d =   obj.dvmlap_entry(ind,:) - obj.dvmlap_tip(ind,:) ;
+            [r, theta, phi] = ElectrodeArray.cart2sph_d(d(:,2), d(:,3), d(:, 1));            
         end
         
         function phi = phi(obj, ind)
@@ -280,7 +294,7 @@ classdef ElectrodeArray < handle
         end
         
         function s = to_struct(self, ind)
-            if nargin==1,
+            if nargin == 1
                 ind = 1:size(self.dvmlap_entry, 1);
             end
             s = struct('coronal_index', self.coronal_index(ind),...
@@ -298,15 +312,29 @@ classdef ElectrodeArray < handle
             if nargin < 2, output_file = [pwd filesep 'electrode_array.csv']; end
             writetable(struct2table(self.to_struct), output_file);
         end
-        
     end
-    
+      
     methods(Static)
-        function [r, theta, phi] = cart2sph_d(d)
+        function [r, theta, phi] = cart2sph_d(ml, ap, dv)
+            % [r, theta, phi] = cart2sph_d(ml, ap, dv)
             % d is the diff tip-entry (ref to entry point)
-            [phi, theta, r] = cart2sph(-d(:,2), d(:,3), d(:,1));
-            theta = mod(90 - theta .* 180 / pi, 180);
-            phi = phi.* 180 / pi;
+            % theta: polar angle, phi: azimuth, r: radius
+            % NB: for now the depth is positive in Needles unlike in the Atlas
+            dv = -dv;
+            r = sqrt(ml.^ 2 + ap.^ 2 + dv.^2);
+            phi = atan2(ap, ml) .* 180 ./ pi;
+            theta = r .* 0;
+            theta(r~=0) = acos(dv(r~=0) ./ r(r~=0)) .* 180 ./ pi;
+        end
+        
+        function [ml, ap, dv] = sph2cart_d(r, theta, phi)
+            % [ml, ap, dv] = sph2cart_d(r, theta, phi)
+            % theta: polar angle, phi: azimuth, r: radius
+            ml = r .* cosd(phi) .* sind(theta);
+            ap = r .* sind(phi) .* sind(theta);
+            dv = r .* cosd(theta);
+            % NB: for now the depth is positive in Needles unlike in the Atlas
+            dv = -dv;
         end
     end
 end
