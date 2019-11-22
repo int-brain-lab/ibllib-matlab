@@ -17,13 +17,14 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+function fig_main_CloseRequestFcn(hobj, evt, h)
+delete(hobj);
 
 function Needles_OpeningFcn(hobj, evt, h, varargin)
 h.output = hobj;
-h.ver = '1.0.2';
+h.ver = '1.0.3';
 setappdata(0, 'Needles', h.fig_main)
 guidata(hobj, h);
-set(h.menu_electrode, 'Enable', 'off')
 
 
 function varargout = Needles_OutputFcn(hobj, evt, h) 
@@ -31,12 +32,16 @@ logo = logo_ibl('square');
 h.im_logo = image(logo, 'Parent', h.axes_logo);
 axis(h.axes_logo, 'off');
 % init preferences: when needed, to automatic check to add new prefs
-default = struct('path_atlas', pwd,  'lateralize', true);
-pfile = [fileparts(mfilename('fullpath')) filesep 'needles_param.json'];
-if ~exist(pfile, 'file')
-    io.write.json(pfile, default)
+default = struct(...
+    'allen', struct('path', [pwd filesep 'allen']),...
+    'dsurqe', struct('path', [pwd filesep 'dsurqe'], 'lateralize', true),...
+    'waxholm', struct('path', [pwd filesep 'waxholm'])...
+    );
+h.pfile = [fileparts(mfilename('fullpath')) filesep 'needles_param.json'];
+if ~exist(h.pfile, 'file')
+    io.write.json(h.pfile, default)
 end
-h.pref = io.read.json(pfile);
+h.pref = io.read.json(h.pfile);
 h.fcn.Update_Slices = @Update_Slices;
 h.fcn.Update_txt_electrodes = @Update_txt_electrodes;
 h.fcn.Update_Electrodes = @electrodes_update;
@@ -65,6 +70,14 @@ switch true
         set(h.txt_title, 'String', 'Dorr et.al., 2008, High resolution three-dimensional brain atlas using an average magnetic resonance image of 40 adult C57Bl/6J mice.')
         lims = struct('ap_lims', [-0.0078 0.00288], 'ml_lims', [-0.004 0.004]);
         pref_field = 'dsurqe';
+end
+if ~exist(h.pref.(pref_field).path, 'dir')
+    adir = uigetdir('', ['Select folder containing atlas: ' pref_field ]);
+    if isscalar(adir) && adir == 0, return, end
+    h.pref.(pref_field).path = adir;
+    io.write.json(h.pfile, h.pref)
+    h.pref = io.read.json(h.pfile);
+    guidata(h.fig_main, h)
 end
 D.atlas = BrainAtlas(h.pref.(pref_field).path, atlas_label);
 
@@ -128,7 +141,6 @@ set([h.pl_phy_xr, h.pl_lab_xr, h.pl_phy_zone, h.pl_lab_zone], 'Visible', 'Off')
 set(h.fig_main,'WindowButtonMotionFcn', {@fig_main_WindowButtonMotionFcn, h})
 % prevents from re-loading the Atlas for the time being
 set(h.menu_file, 'Enable', 'off')
-set(h.menu_3d_plot, 'Enable', 'on')
 h.txt_top_apline = text(NaN, NaN, '', 'Parent', h.axes_top, 'Color', color_from_index(2),'Fontsize',12, 'Fontweight', 'bold');
 guidata(h.fig_main, h)
 setappdata(h.fig_main, 'Data', D)
@@ -331,6 +343,7 @@ if ~isempty(labind)
     set([h.pl_phy_zone_lock h.pl_lab_zone_lock], 'xdata', bc.i2x(z), 'ydata', bc.i2z(x))
 end
 % Find the electrodes from the closest coronal plane
+if D.E.n == 0, return, end
 [d, ie] = min(abs(ap(1) -  D.E.dvmlap_entry(:,3)));
 i1 = abs( D.E.dvmlap_entry(:,3) - D.E.dvmlap_entry(ie,3)) < NEAREST_DISTANCE_M;
 % Plot Electrodes
@@ -351,7 +364,7 @@ end
 function fig_main_KeyPressFcn(hobj, evt, h)
 h = guidata(h.fig_main);
 D = getappdata(h.fig_main, 'Data');
-ap = get(h.pl_top_apline, 'Xdata');
+try ap = get(h.pl_top_apline, 'Xdata'); end
 switch true
     % lock to posterior electrode plane
     case strcmp(evt.Key, 'leftarrow') & strcmp(evt.Modifier,'control')        
@@ -423,9 +436,23 @@ function menu_file_dsurqe_Callback(hobj, evt, h)
 load_atlas(h, 'dsurqe')
 
 function menu_electrode_table_Callback(hobj, evt, h)
+D = getappdata(h.fig_main, 'Data');
+try D.E.show_table;end
+
 function menu_electrode_load_Callback(hobj, evt, h)
 function menu_electrode_write_Callback(hobj, evt, h)
 
+function menu_electrode_add_Callback(hobj, evt, h)
+
+
+
+function menu_electrode_remove_all_Callback(hobj, evt, h)
+D = getappdata(h.fig_main, 'Data');
+D.E.removeAll  % no need for a setappdata as operation is done in-place
+ple = [h.pl_lab_current_elec, h.pl_lab_electrodes, h.pl_lab_electrodes_traj,...
+ h.pl_phy_current_elec, h.pl_phy_electrodes, h.pl_phy_electrodes_traj, ...
+ h.pl_top_current_elec, h.pl_top_electrodes];
+set(ple, 'xdata', NaN, 'ydata', NaN)
 
 % --------------------------------------------------------------------
 function menu_3d_plot_Callback(hobj, evt, h)

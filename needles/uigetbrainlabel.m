@@ -1,4 +1,6 @@
 function [ind, name] = uigetbrainlabel
+% Gets the current Needles instance, jumps to the brain location.
+% Assumes the Allen Atlas layout.
 
 h = guidata(getappdata(0, 'Needles'));
 D = getappdata(h.fig_main);
