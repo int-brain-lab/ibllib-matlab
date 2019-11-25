@@ -30,16 +30,16 @@ brainLocations(iok) = atlas.labels.table.acronym(tind(iok));
 trajX = trajX*trajScale; spacing = spacing*trajScale; padding = padding*trajScale;
 im = imagesc(1, trajX, lab, 'Parent', ax);
 set(ax, 'nextplot', 'add')
-plot([0.5 1.5], padding*[1 1], 'k', 'LineWidth', 4.0); 
-plot([0.5 1.5], (max(trajX)-padding)*[1 1], 'k', 'LineWidth', 4.0); 
-fill([0.5 1.5 1.5 0.5], [0 0 padding padding], 'w', 'FaceAlpha', 0.8, 'EdgeAlpha', 0); 
-fill([0.5 1.5 1.5 0.5], max(trajX)-[0 0 padding padding], 'w', 'FaceAlpha', 0.8, 'EdgeAlpha', 0); 
+plot(ax, [0.5 1.5], padding*[1 1], 'k', 'LineWidth', 4.0); 
+plot(ax, [0.5 1.5], (max(trajX)-padding)*[1 1], 'k', 'LineWidth', 4.0); 
+fill(ax, [0.5 1.5 1.5 0.5], [0 0 padding padding], 'w', 'FaceAlpha', 0.8, 'EdgeAlpha', 0); 
+fill(ax, [0.5 1.5 1.5 0.5], max(trajX)-[0 0 padding padding], 'w', 'FaceAlpha', 0.8, 'EdgeAlpha', 0); 
 
 dLab = find(diff([-1; double(lab)])~=0);
 if dLab(end)~=numel(lab); dLab(end+1) = numel(lab); end
 for u = 1:(numel(dLab)-1)
     uy(u) = mean(dLab(u:u+1));
-    plot([0.5 1.5], trajX(dLab(u))*[1 1]-0.5*spacing, 'Color', [0.5 0.5 0.5], 'LineWidth', 0.5);
+    plot(ax, [0.5 1.5], trajX(dLab(u))*[1 1]-0.5*spacing, 'Color', [0.5 0.5 0.5], 'LineWidth', 0.5);
     itable = tind(dLab(u));
     if itable == 0
         uStr{u} = 'OUT';

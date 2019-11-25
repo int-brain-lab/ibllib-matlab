@@ -172,7 +172,8 @@ Update_txt_electrodes(hobj, ie);
 set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,2), 'ydata', D.E.dvmlap_entry(ie,1))
 set( h.pl_top_current_elec,'Visible', 'on',...
-    'xdata', D.E.dvmlap_entry(ie,3), 'ydata', D.E.dvmlap_entry(ie,2))
+    'xdata', [D.E.dvmlap_entry(ie,3) D.E.dvmlap_tip(ie,3)],...
+    'ydata', [D.E.dvmlap_entry(ie,2) D.E.dvmlap_tip(ie,2)])
 drawnow
 if false && ishandle(h.fig_table_elec)
     get(h.table_elec)
@@ -198,9 +199,10 @@ angle = D.E.theta(ie);
 
 % slice
 D.E.plot_probes_at_slice(D.atlas, h_.ax1, ap_current, ie);
-title(sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(D.E.theta(ie))));
+title(h_.ax1, sprintf('%.1fap, %.1fml\n%d deg', entry(3), entry(2), round(D.E.theta(ie))));
 D.E.plot_brain_loc(ie, h_.ax2, D.atlas);
-
+% update top plot if electrodes added/removed
+set(h.pl_top_electrodes, 'xdata', D.E.dvmlap_entry(:,3), 'ydata', D.E.dvmlap_entry(:,2))
 
 function table_e_cellSelection(hobj, evt)
 set(hobj, 'UserData', evt)
@@ -443,6 +445,7 @@ try D.E.show_table;end
 function menu_electrode_load_Callback(hobj, evt, h)
 function menu_electrode_write_Callback(hobj, evt, h)
 function menu_electrode_add_Callback(hobj, evt, h)
+uiaddinsertion
 
 function menu_electrode_remove_all_Callback(hobj, evt, h)
 D = getappdata(h.fig_main, 'Data');
