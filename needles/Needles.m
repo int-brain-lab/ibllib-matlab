@@ -44,8 +44,8 @@ end
 h.pref = io.read.json(h.pfile);
 h.fcn.Update_Slices = @Update_Slices;
 h.fcn.Update_txt_electrodes = @Update_txt_electrodes;
-h.fcn.Update_Electrodes = @electrodes_update;
 h.fcn.Load_Atlas =  @load_atlas;
+h.fcn.pl_top_electrodes_ButtonDownFcn = @pl_top_electrodes_ButtonDownFcn;
 % wrap-up and save in handles
 guidata(hobj, h);
 varargout{1} = h.output;
@@ -320,6 +320,7 @@ end
 
 
 function Update_Slices(hobj, evt, ap)
+% Update the displays according to the ap coordintes (m relative to Bregma)
 NEAREST_DISTANCE_M = .00015;
 D = getappdata(hobj, 'Data');
 h = guidata(hobj);
@@ -441,10 +442,7 @@ try D.E.show_table;end
 
 function menu_electrode_load_Callback(hobj, evt, h)
 function menu_electrode_write_Callback(hobj, evt, h)
-
 function menu_electrode_add_Callback(hobj, evt, h)
-
-
 
 function menu_electrode_remove_all_Callback(hobj, evt, h)
 D = getappdata(h.fig_main, 'Data');

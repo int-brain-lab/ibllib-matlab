@@ -63,18 +63,37 @@ classdef ElectrodeArray < handle
             obj.index = [];
         end
         
-        function self = add_probe(self, dv, ml, ap, theta, phi, depth)
-            % e.add_probe(self, dv, ml, ap, theta, phi, depth)
+        function obj = remove_probe(obj, n)
+            assert(n <= obj.n)
+            obj.n = obj.n - 1;
+            obj.dvmlap_entry(n, :) = [];
+            obj.dvmlap_tip(n, :) = [];
+            obj.probe_roll(n) = [];
+            obj.coronal_index(n) = [];
+            obj.sagittal_index(n) = [];
+            obj.index(n) = [];
+        end
+        
+        function self = add_probe(self, dv, ml, ap, theta, phi, depth, varargin)
+            % e.add_probe(dv, ml, ap, theta, phi, depth)
+            % e.add_probe(..., 'index', 2) % modify current insertion at index 2
             % dv, ml, ap: insertion points coordinates (m)
             % theta: polar angle (degrees)
             % phi: azimuth (degrees)
+            p = inputParser;
+            addOptional(p, 'index',  self.n + 1, @isnumeric);
+            parse(p, varargin{:});
+            for fn = fieldnames(p.Results)', eval([fn{1} '= p.Results.' (fn{1}) ';']); end
+            % get the tip coordinates
             [tml, tap, tdv] = ElectrodeArray.sph2cart_d(depth, theta, phi);
-            self.dvmlap_tip(end + 1, :) = [dv, ml, ap] - [tdv, tml, tap];
-            self.dvmlap_entry(end + 1, :) = [dv, ml, ap];
-            self.probe_roll(end + 1, :) = 0;
-            self.coronal_index(end + 1, :) = 0;
-            self.sagittal_index(end + 1, :) = 0;
-            self.n = self.n + 1;
+            self.dvmlap_tip(index, :) = [dv, ml, ap] - [tdv, tml, tap];
+            % label the other values properly
+            self.dvmlap_entry(index, :) = [dv, ml, ap];
+            self.probe_roll(index, :) = 0;
+            self.coronal_index(index, :) = 0;
+            self.sagittal_index(index, :) = 0;
+            self.index(index, :) = 0;
+            self.n = size(self.dvmlap_tip, 1);
         end
         
         function obj = add_probe_by_start_angles(obj, startCoord, angles, depth, atlas, corIdx, sagIdx)

@@ -23,7 +23,6 @@ classdef test_ElectrodeArray < matlab.unittest.TestCase
             index = [1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0];
             testCase.E2 = ElectrodeArray(entry, tip, 'coronal_index', coronal_index, 'sagittal_index', sagittal_index,...
                 'index', index);
-            
         end
     end
     
@@ -45,18 +44,28 @@ classdef test_ElectrodeArray < matlab.unittest.TestCase
             self.assertTrue( all(E.depth == .035))
         end
         
-        function test_add_probe(self)
+        function test_add_remove_probe(self)
             E = ElectrodeArray([], []);
             ind = 10;
             dvmlap = self.E2.dvmlap_entry(ind, :);
             [r, theta, phi ]= self.E2.cart2sph_(ind);
+            % add a first probe
             E.add_probe(dvmlap(1), dvmlap(2), dvmlap(3), theta, phi, r);
             ddd = [E.dvmlap_tip(1, :) ; self.E2.dvmlap_tip(ind, :)];
             assert(all(abs(diff(ddd, 1, 1)) <= 1e-17))
             assert(E.theta(1) == self.E2.theta(ind))
             assert(E.phi(1) == self.E2.phi(ind))
+            % add a second one
             E.add_probe(dvmlap(1), dvmlap(2), dvmlap(3), theta, phi, r);
             assert(E.n == 2)
+            % change the second one
+            E.add_probe(dvmlap(1), dvmlap(2), dvmlap(3), theta, 0, r, 'index', 2);
+            assert(E.n == 2)
+            assert(E.phi(2) == 0)
+            % and then remove the first probe
+            E.remove_probe(1)
+            assert(E.n == 1)
+            assert(E.phi(1) == 0)
         end
         
         function test_cartesian2spherical(testCase)
