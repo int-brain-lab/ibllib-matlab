@@ -107,6 +107,7 @@ set(h.pl_top_apline, 'ButtonDownFcn', @pl_top_apline_ButtonDownFcn)
 h.pl_top_electrodes = plot(h.axes_top, D.E.dvmlap_entry(:,3), D.E.dvmlap_entry(:,2), '.', ...
 'ButtonDownFcn', @pl_top_electrodes_ButtonDownFcn, 'MarkerSize', 10, 'Color','w');
 h.pl_top_current_elec = plot(h.axes_top, NaN, NaN, '*', 'color', 'm', 'MarkerSize',12);
+h.pl_top_current_elec_track = plot(h.axes_top, NaN, NaN, 'm', 'linewidth', 3);
 
 % Create all the objects depending on the contrast axes
 h.im_phy = imagesc(bc.xscale, bc.zscale,  D.atlas.vol_image(:,:,round(bc.y2i(0))), 'Parent', h.axes_phy);
@@ -171,9 +172,12 @@ set(h.axes_top,'UserData', round(bc.y2i(ap_current(1))))
 Update_txt_electrodes(hobj, ie);
 set([ h.pl_lab_current_elec, h.pl_phy_current_elec],'Visible', 'on',...
     'xdata', D.E.dvmlap_entry(ie,2), 'ydata', D.E.dvmlap_entry(ie,1))
-set( h.pl_top_current_elec,'Visible', 'on',...
-    'xdata', [D.E.dvmlap_entry(ie,3) D.E.dvmlap_tip(ie,3)],...
-    'ydata', [D.E.dvmlap_entry(ie,2) D.E.dvmlap_tip(ie,2)])
+    set(h.pl_top_current_elec_track,'Visible', 'on',...
+        'xdata', [D.E.dvmlap_entry(ie,3) D.E.dvmlap_tip(ie,3)],...
+        'ydata', [D.E.dvmlap_entry(ie,2) D.E.dvmlap_tip(ie,2)])
+set(h.pl_top_current_elec,'Visible', 'on',...
+    'xdata', D.E.dvmlap_entry(ie,3),'ydata', D.E.dvmlap_entry(ie,2))
+
 drawnow
 if false && ishandle(h.fig_table_elec)
     get(h.table_elec)
