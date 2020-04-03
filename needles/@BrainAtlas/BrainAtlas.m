@@ -25,15 +25,15 @@ classdef BrainAtlas
                 case 'ibl10'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_ibl(atlas_path, 10); 
                 case 'allen50'
-                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 25);
-                case 'allen25'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 50);
+                case 'allen25'
+                    [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 25);
                 case 'allen10'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels, obj.cmap] = obj.get_allen(atlas_path, 10);
                 case 'dsurqe'
                     [obj.vol_labels, obj.vol_image, obj.brain_coor, obj.labels] = obj.get_dsurqe(atlas_path);
                 otherwise
-                    error('Possible atlases are: "allen50", "dsurqe"')
+                    error('Possible atlases are: "allenXX", "ilbXX", "dsurqe"')
             end
                 
             % get the top and bottom surfaces of the brain using the labels volume
@@ -57,7 +57,8 @@ classdef BrainAtlas
     end
     
     methods
-       h = show(obj, h) 
+       h = show(obj, h)
+       slice = tilted_slice(obj, linepts, sxdim, sydim, ssdim)
     end
     
     methods (Static)

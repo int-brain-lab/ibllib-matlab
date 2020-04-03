@@ -1,4 +1,4 @@
-function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, res_um, varargin)
+function [vol_labels, vol_image, bc, labels, cmap] = get_allen(atlas_path, varargin)
 
 %% All units SI
 % http://help.brain-map.org/display/mousebrain/API#API-DownloadImages

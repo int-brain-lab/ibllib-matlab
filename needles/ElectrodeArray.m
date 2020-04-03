@@ -222,8 +222,8 @@ classdef ElectrodeArray < handle
         end
         
         function h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
-            %             h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
-            
+            % h = plot_probes_at_slice(obj, atlas, ax, apCoord, ie)
+            % coronal slice with probe projection
             if nargin <= 4, ie = []; end
             
             these = obj.dvmlap_entry(:,3)==apCoord;
@@ -332,7 +332,8 @@ classdef ElectrodeArray < handle
             writetable(struct2table(self.to_struct), output_file);
         end
     end
-      
+   
+    
     methods(Static)
         function [r, theta, phi] = cart2sph_d(ml, ap, dv)
             % [r, theta, phi] = cart2sph_d(ml, ap, dv)
