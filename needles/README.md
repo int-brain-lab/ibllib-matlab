@@ -9,7 +9,8 @@ Earliers versions need to install the Json lab toolbox https://github.com/fangq/
 ### For Allen CCF Atlas at 50 µm resolution (IBL's default)
 You will need the average_template and the annotation volume.
 For IBL, files are in google drive / WG-Physiology/Resources/Brain Atlases/Allen50:
-- 	https://drive.google.com/drive/u/0/folders/1x9zVNWtUofVA0FTmCKPwQcj2PbH_wBoD
+- 	http://ibl.flatironinstitute.org/histology/ATLAS/Needles/Allen/
+Download file average_template_25.nrrd (can chose 10 or 50 depending on wanted resolution)
 
 Files are also publicly available from the Allen Brain Institute servers:
 -   http://download.alleninstitute.org/informatics-archive/current-release/mouse_ccf/
